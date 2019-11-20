@@ -3,6 +3,9 @@ Code.require_file("../test_helper.exs", __DIR__)
 defmodule IEx.InteractionTest do
   use IEx.Case
 
+  test "fail" do
+    assert 1 == 2
+  end
   test "whole output" do
     assert capture_io("IO.puts \"Hello world\"", fn ->
              IEx.Server.run(dot_iex_path: "")
