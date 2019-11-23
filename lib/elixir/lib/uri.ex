@@ -498,10 +498,11 @@ defmodule URI do
     {userinfo, host, port}
   end
 
+  @doc false
   # Regex.run returns empty strings sometimes. We want
   # to replace those with nil for consistency.
-  defp nillify(""), do: nil
-  defp nillify(other), do: other
+  def nillify(""), do: nil
+  def nillify(other), do: other
 
   @doc """
   Returns the string representation of the given [URI struct](`t:t/0`).
@@ -626,15 +627,41 @@ defmodule URI do
 end
 
 defimpl String.Chars, for: URI do
-  def to_string(%{host: host, authority: authority, path: path} = uri)
-      when (host != nil or authority != nil) and is_binary(path) and
-             binary_part(path, 0, 1) != "/" do
+  import URI, only: [nillify: 1]
+
+  def to_string(%URI{
+        scheme: scheme,
+        path: path,
+        query: query,
+        fragment: fragment,
+        authority: authority,
+        userinfo: userinfo,
+        host: host,
+        port: port
+      }) do
+    to_string_nillified(%URI{
+      scheme: nillify(scheme),
+      path: nillify(path),
+      query: nillify(query),
+      fragment: nillify(fragment),
+      authority: nillify(authority),
+      userinfo: nillify(userinfo),
+      host: nillify(host),
+      port: nillify(port)
+    })
+  end
+
+  defp to_string_nillified(%{host: host, authority: authority, path: path} = uri)
+       when (host != nil or authority != nil) and is_binary(path) and
+              binary_part(path, 0, 1) != "/" do
     raise ArgumentError,
-          ":path in URI must be nil or an absolute path if host or authority are given, " <>
+          ":path in URI must be nil or an absolute path if :host or :authority are given, " <>
             "got: #{inspect(uri)}"
   end
 
-  def to_string(%{scheme: scheme, port: port, path: path, query: query, fragment: fragment} = uri) do
+  defp to_string_nillified(
+         %{scheme: scheme, port: port, path: path, query: query, fragment: fragment} = uri
+       ) do
     uri =
       case scheme && URI.default_port(scheme) do
         ^port -> %{uri | port: nil}

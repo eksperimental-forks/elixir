@@ -347,12 +347,21 @@ defmodule URITest do
     assert URI.to_string(URI.parse("//user:password@google.com/")) ==
              "//user:password@google.com/"
 
+    assert URI.to_string(%URI{authority: "foo.com", path: nil}) ==
+             URI.to_string(%URI{authority: "foo.com", path: ""})
+
+    assert URI.to_string(%URI{authority: nil, path: "hello/123"}) ==
+             URI.to_string(%URI{authority: "", path: "hello/123"})
+
+    assert URI.to_string(%URI{host: nil, path: "hello/123"}) ==
+             URI.to_string(%URI{host: "", path: "hello/123"})
+
     assert_raise ArgumentError,
-                 ~r":path in URI must be nil or an absolute path if host or authority are given",
+                 ~r":path in URI must be nil or an absolute path if :host or :authority are given",
                  fn -> %URI{authority: "foo.com", path: "hello/123"} |> URI.to_string() end
 
     assert_raise ArgumentError,
-                 ~r":path in URI must be nil or an absolute path if host or authority are given",
+                 ~r":path in URI must be nil or an absolute path if :host or :authority are given",
                  fn -> %URI{host: "foo.com", path: "hello/123"} |> URI.to_string() end
   end
 
