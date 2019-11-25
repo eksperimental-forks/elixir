@@ -4,6 +4,7 @@ env:
   ELIXIRC_OPTS: "--warnings-as-errors"
   ERLC_OPTS: "+warning_as_errors"
   LANG: C.UTF-8
+  LANG_ALL: C.UTF-8
 
 
 # test_linux_task:
@@ -135,6 +136,7 @@ test_freebsd_task:
             CHECK_REPRODUCIBLE: true
 
   install_script:
+    - cat /etc/default/locale
     - sudo pkg update
     - pkg install -y erlang gmake
     # - wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-14.04/${OTP_RELEASE}.tar.gz
