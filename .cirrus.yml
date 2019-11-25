@@ -119,8 +119,10 @@ env:
 test_freebsd_task:
   freebsd_instance:
     image_family: freebsd-12-0
-    cpu: 8
-    memory: 7424Mi
+    # cpu: 8
+    # memory: 7424Mi
+    cpu: 2
+    memory: 2048Mi
 
   env:
     PATH: "${CIRRUS_WORKING_DIR}/otp/bin:${PATH}"
@@ -134,29 +136,29 @@ test_freebsd_task:
 
   install_script:
     - sudo pkg update
-    - pkg install -y erlang
+    - pkg install -y erlang gmake
     # - wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-14.04/${OTP_RELEASE}.tar.gz
     # - mkdir -p otp
     # - tar zxf otp.tar.gz -C otp --strip-components=1
     # - otp/Install -minimal ${CIRRUS_WORKING_DIR}/otp
-    # - rm -rf .git
-    - make compile
+    - rm -rf .git
+    - gmake compile
 
   build_info_script: bin/elixir --version
 
   test_formatted_script:
-    - make test_formatted &&
+    - gmake test_formatted &&
       echo "All Elixir source code files are properly formatted."
 
   dialyzer_script: dialyzer -pa lib/elixir/ebin --build_plt --output_plt elixir.plt --apps lib/elixir/ebin/elixir.beam lib/elixir/ebin/Elixir.Kernel.beam
 
-  test_erlang_script: make test_erlang
+  test_erlang_script: gmake test_erlang
 
-  test_elixir_script: make test_elixir
+  test_elixir_script: gmake test_elixir
 
   check_reproducible_script: |
     if [ -n "$CHECK_REPRODUCIBLE" ]; then
-      make check_reproducible
+      gmake check_reproducible
     else
       echo "The format reproducibility of the build is only checked in the last stable Erlang/OTP version."
     fi
