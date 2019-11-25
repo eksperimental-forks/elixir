@@ -135,9 +135,9 @@ test_freebsd_task:
             CHECK_REPRODUCIBLE: true
 
   install_script:
-    - LANG_ALL=C.UTF-8; export LANG_ALL
-    - cat "/etc/login.conf" || echo "/etc/.login_conf" not found
+    - LANG_ALL="C.UTF-8"; export LANG_ALL
     - locale || echo "locale not found"
+    - cat "/etc/login.conf" || echo "/etc/login.conf" not found
     - cat ~/.profile || echo "~/.profile" not found
     - cat ~/.cshrc || echo "~/.cshrc" not found
     - sudo pkg update
@@ -145,7 +145,10 @@ test_freebsd_task:
     - rm -rf .git
     - gmake compile
 
-  build_info_script: bin/elixir --version
+  build_info_script:
+    - LANG_ALL="C.UTF-8" bin/elixir --version
+    - LANG_ALL="UTF-8" bin/elixir --version
+    - LC_ALL="en_US.UTF-8" bin/elixir --version
 
   test_formatted_script:
     - gmake test_formatted &&
