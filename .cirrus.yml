@@ -127,13 +127,11 @@ test_freebsd_task:
     # memory: 2048Mi
 
   env:
-    PATH: "${CIRRUS_WORKING_DIR}/otp/bin:${PATH}"
-    LANG_ALL: C.UTF-8
     CHECK_REPRODUCIBLE: true
 
   install_script:
     - sudo pkg update
-    - pkg install -y erlang gmake
+    - pkg install -y erlang gmake git
     - rm -rf .git
     - gmake compile
 
