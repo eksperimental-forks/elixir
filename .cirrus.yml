@@ -136,6 +136,7 @@ test_freebsd_task:
             CHECK_REPRODUCIBLE: true
 
   install_script:
+    - cat "/etc/login.conf" || echo "/etc/.login_conf" not found
     - locale || echo "locale not found"
     - cat ~/.login_conf || echo "~/.login_conf" not found
     - cat ~/.profile || echo "~/.profile" not found
