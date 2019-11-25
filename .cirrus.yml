@@ -3,8 +3,8 @@ env:
   ELIXIR_ASSERT_TIMEOUT: 2000
   ELIXIRC_OPTS: "--warnings-as-errors"
   ERLC_OPTS: "+warning_as_errors"
-  LANG: en_US.UTF-8
-  # LC_ALL: en_US.UTF-8
+  LANG: C.UTF-8
+  LC_ALL: en_US.UTF-8
 
 # test_linux_task:
 #   container:
