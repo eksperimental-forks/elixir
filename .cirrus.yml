@@ -136,7 +136,11 @@ test_freebsd_task:
             CHECK_REPRODUCIBLE: true
 
   install_script:
-    - cat /etc/default/locale
+    - locale || echo "locale not found"
+    - cat ~/.login_conf || echo "~/.login_conf" not found
+    - cat ~/.profile || echo "~/.profile" not found
+    - cat ~/.cshrc || echo "~/.cshrc" not found
+    - cat ~/.bashrc || echo "~/.bashrc" not found
     - sudo pkg update
     - pkg install -y erlang gmake
     # - wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-14.04/${OTP_RELEASE}.tar.gz
