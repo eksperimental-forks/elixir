@@ -4,7 +4,6 @@ env:
   ELIXIRC_OPTS: "--warnings-as-errors"
   ERLC_OPTS: "+warning_as_errors"
   LANG: en_US.UTF-8
-  LC_ALL: en_US.UTF-8
 
 test_linux_task:
   container:
@@ -128,6 +127,7 @@ test_freebsd_task:
 
   env:
     CHECK_REPRODUCIBLE: true
+    LC_ALL: en_US.UTF-8
 
   install_script:
     - sudo pkg update
