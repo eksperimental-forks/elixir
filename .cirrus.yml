@@ -3,8 +3,8 @@ env:
   ELIXIR_ASSERT_TIMEOUT: 2000
   ELIXIRC_OPTS: "--warnings-as-errors"
   ERLC_OPTS: "+warning_as_errors"
-  LANG: C.UTF-8
-  LC_ALL: C.UTF-8
+  LANG: en_US.UTF-8
+  # LC_ALL: en_US.UTF-8
 
 # test_linux_task:
 #   container:
@@ -117,39 +117,27 @@ env:
 
 
 test_freebsd_task:
+  name: FreeBSD 12.0
+
   freebsd_instance:
     image_family: freebsd-12-0
-    # cpu: 8
-    # memory: 7424Mi
-    cpu: 2
-    memory: 2048Mi
+    cpu: 8
+    memory: 7424Mi
+    # cpu: 2
+    # memory: 2048Mi
 
   env:
     PATH: "${CIRRUS_WORKING_DIR}/otp/bin:${PATH}"
     LANG_ALL: C.UTF-8
-
-  matrix:
-    - name: FreeBSD 12.0
-      matrix:
-        - env:
-            CHECK_POSIX_COMPLIANT: true
-            CHECK_REPRODUCIBLE: true
+    CHECK_REPRODUCIBLE: true
 
   install_script:
-    - LANG_ALL="en_US.UTF-8"; export LANG_ALL
-    - locale || echo "locale not found"
-    - cat "/etc/login.conf" || echo "/etc/login.conf" not found
-    - cat ~/.profile || echo "~/.profile" not found
-    - cat ~/.cshrc || echo "~/.cshrc" not found
     - sudo pkg update
     - pkg install -y erlang gmake
     - rm -rf .git
     - gmake compile
 
-  build_info_script:
-    - LC_ALL="C.UTF-8" bin/elixir --version
-    - LC_ALL="UTF-8" bin/elixir --version
-    - LC_ALL="en_US.UTF-8" bin/elixir --version
+  build_info_script: bin/elixir --version
 
   test_formatted_script:
     - gmake test_formatted &&
