@@ -114,3 +114,43 @@ test_windows_task:
   test_erlang_script: make --keep-going test_erlang
 
   test_elixir_script: make --keep-going test_elixir
+
+
+test_freebsd_task:
+  freebsd_instance:
+    image_family: freebsd-10-4
+    cpu: 8
+    memory: 7424Mi
+
+  env:
+    PATH: "${CIRRUS_WORKING_DIR}/otp/bin:${PATH}"
+
+  matrix:
+    - name: FreeBSD 10.4
+      matrix:
+        - env:
+            CHECK_POSIX_COMPLIANT: true
+            CHECK_REPRODUCIBLE: true
+
+  install_script:
+    - sudo pkg update
+    - pkg install -y erlang
+
+  build_info_script: bin/elixir --version
+
+  test_formatted_script:
+    - make test_formatted &&
+      echo "All Elixir source code files are properly formatted."
+
+  dialyzer_script: dialyzer -pa lib/elixir/ebin --build_plt --output_plt elixir.plt --apps lib/elixir/ebin/elixir.beam lib/elixir/ebin/Elixir.Kernel.beam
+
+  test_erlang_script: make test_erlang
+
+  test_elixir_script: make test_elixir
+
+  check_reproducible_script: |
+    if [ -n "$CHECK_REPRODUCIBLE" ]; then
+      make check_reproducible
+    else
+      echo "The format reproducibility of the build is only checked in the last stable Erlang/OTP version."
+    fi
