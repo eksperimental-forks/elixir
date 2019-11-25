@@ -4,6 +4,7 @@ env:
   ELIXIRC_OPTS: "--warnings-as-errors"
   ERLC_OPTS: "+warning_as_errors"
   LANG: C.UTF-8
+  LC_ALL: C.UTF-8
 
 # test_linux_task:
 #   container:
@@ -135,7 +136,7 @@ test_freebsd_task:
             CHECK_REPRODUCIBLE: true
 
   install_script:
-    - LANG_ALL="C.UTF-8"; export LANG_ALL
+    - LANG_ALL="en_US.UTF-8"; export LANG_ALL
     - locale || echo "locale not found"
     - cat "/etc/login.conf" || echo "/etc/login.conf" not found
     - cat ~/.profile || echo "~/.profile" not found
@@ -146,8 +147,8 @@ test_freebsd_task:
     - gmake compile
 
   build_info_script:
-    - LANG_ALL="C.UTF-8" bin/elixir --version
-    - LANG_ALL="UTF-8" bin/elixir --version
+    - LC_ALL="C.UTF-8" bin/elixir --version
+    - LC_ALL="UTF-8" bin/elixir --version
     - LC_ALL="en_US.UTF-8" bin/elixir --version
 
   test_formatted_script:
