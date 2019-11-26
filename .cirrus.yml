@@ -104,20 +104,19 @@ test_windows_task:
 
   install_script:
     - rmdir /s /q .git
-    - make compile
+  #   - make compile
 
-  build_info_script: bin/elixir --version
+  # build_info_script: bin/elixir --version
 
-  test_formatted_script:
-    - make test_formatted &&
-      echo "All Elixir source code files are properly formatted."
+  # test_formatted_script:
+  #   - make test_formatted &&
+  #     echo "All Elixir source code files are properly formatted."
 
-  test_erlang_script: make --keep-going test_erlang
+  # test_erlang_script: make --keep-going test_erlang
 
-  test_elixir_script: make --keep-going test_elixir
+  # test_elixir_script: make --keep-going test_elixir
 
   check_reproducible_script: |
-    rem IF "%CHECK_REPRODUCIBLE%"=="true" (
     IF DEFINED CHECK_REPRODUCIBLE (
       make check_reproducible
     ) ELSE (
