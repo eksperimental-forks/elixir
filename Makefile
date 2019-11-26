@@ -135,9 +135,9 @@ check_reproducible: compile
 		fc lib/ex_unit/ebin/* lib/ex_unit/tmp/ebin_reproducible/* || exit /b; \
 		fc lib/iex/ebin/* lib/iex/tmp/ebin_reproducible/* || exit /b; \
 		fc lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/* || exit /b; \
-		fc lib/mix/ebin/* lib/mix/tmp/ebin_reproducible/* || exit /b; \
+		fc lib/mix/ebin/* lib/elixir/tmp/ebin_reproducible/* || exit /b; \
 		echo Builds are reproducible; \
-		echo.; \
+		echo \
 	else \
 		echo "Diffing..."; \
 		diff -r lib/elixir/ebin/ lib/elixir/tmp/ebin_reproducible/; \
