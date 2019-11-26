@@ -117,7 +117,6 @@ test_windows_task:
   # test_elixir_script: make --keep-going test_elixir
 
   check_reproducible_script: |
-    rem IF DEFINED CHECK_REPRODUCIBLE (
     IF "%CHECK_REPRODUCIBLE%"=="true" (
       make check_reproducible
     ) ELSE (
