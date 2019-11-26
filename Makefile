@@ -143,17 +143,8 @@ check_reproducible: compile
 	$(Q) mv lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/
 	$(Q) mv lib/mix/ebin/* lib/mix/tmp/ebin_reproducible/
 	SOURCE_DATE_EPOCH=$(call READ_SOURCE_DATE_EPOCH) $(MAKE) compile
-
 	$(Q) if [ "$(OS)" = "Windows_NT" ]; then \
-		ECHO Diffing...
-		fc lib/elixir/ebin/* lib/elixir/tmp/ebin_reproducible/*; \
-		fc lib/eex/ebin/* lib/eex/tmp/ebin_reproducible/*; \
-		fc lib/ex_unit/ebin/* lib/ex_unit/tmp/ebin_reproducible/*; \
-		fc lib/iex/ebin/* lib/iex/tmp/ebin_reproducible/*; \
-		fc lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/*; \
-		fc lib/mix/ebin/* lib/mix/tmp/ebin_reproducible/*; \
-		ECHO Builds are reproducible
-		ECHO ""
+		cmd //C call ./check_reproducible.bat; \
 	else \
 		echo "Diffing..."; \
 		diff -r lib/elixir/ebin/ lib/elixir/tmp/ebin_reproducible/; \
