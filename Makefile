@@ -153,7 +153,7 @@ check_reproducible: compile
 		fc lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/* || exit /b; \
 		fc lib/mix/ebin/* lib/elixir/tmp/ebin_reproducible/* || exit /b; \
 		echo Builds are reproducible; \
-		echo \
+		echo ""; \
 	else \
 		echo "Diffing..."; \
 		diff -r lib/elixir/ebin/ lib/elixir/tmp/ebin_reproducible/; \
