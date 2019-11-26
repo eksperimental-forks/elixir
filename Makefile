@@ -143,14 +143,27 @@ check_reproducible: compile
 	$(Q) mv lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/
 	$(Q) mv lib/mix/ebin/* lib/mix/tmp/ebin_reproducible/
 	SOURCE_DATE_EPOCH=$(call READ_SOURCE_DATE_EPOCH) $(MAKE) compile
-	$(Q) echo "Diffing..."
-	$(Q) diff -r lib/elixir/ebin/ lib/elixir/tmp/ebin_reproducible/
-	$(Q) diff -r lib/eex/ebin/ lib/eex/tmp/ebin_reproducible/
-	$(Q) diff -r lib/ex_unit/ebin/ lib/ex_unit/tmp/ebin_reproducible/
-	$(Q) diff -r lib/iex/ebin/ lib/iex/tmp/ebin_reproducible/
-	$(Q) diff -r lib/logger/ebin/ lib/logger/tmp/ebin_reproducible/
-	$(Q) diff -r lib/mix/ebin/ lib/mix/tmp/ebin_reproducible/
-	$(Q) echo "Builds are reproducible"
+
+	$(Q) if [ "$(OS)" = "Windows_NT" ]; then \
+		ECHO Diffing...\
+		fc lib/elixir/ebin/* lib/elixir/tmp/ebin_reproducible/*; \
+		fc lib/eex/ebin/* lib/eex/tmp/ebin_reproducible/*; \
+		fc lib/ex_unit/ebin/* lib/ex_unit/tmp/ebin_reproducible/*; \
+		fc lib/iex/ebin/* lib/iex/tmp/ebin_reproducible/*; \
+		fc lib/logger/ebin/* lib/logger/tmp/ebin_reproducible/*; \
+		fc lib/mix/ebin/* lib/mix/tmp/ebin_reproducible/*; \
+		$(Q) echo "Builds are reproducible"; \
+	else \
+		echo "Diffing..."; \
+		diff -r lib/elixir/ebin/ lib/elixir/tmp/ebin_reproducible/; \
+		diff -r lib/eex/ebin/ lib/eex/tmp/ebin_reproducible/; \
+		diff -r lib/ex_unit/ebin/ lib/ex_unit/tmp/ebin_reproducible/; \
+		diff -r lib/iex/ebin/ lib/iex/tmp/ebin_reproducible/; \
+		diff -r lib/logger/ebin/ lib/logger/tmp/ebin_reproducible/; \
+		diff -r lib/mix/ebin/ lib/mix/tmp/ebin_reproducible/; \
+		echo "Builds are reproducible"; \
+	fi
+
 
 clean:
 	rm -rf ebin
