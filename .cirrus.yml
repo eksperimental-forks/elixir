@@ -19,9 +19,9 @@ test_linux_task:
     - name: Linux, ${OTP_RELEASE}, Ubuntu 14.04
       matrix:
         - env:
-            OTP_RELEASE: OTP-22.1
             CHECK_POSIX_COMPLIANT: true
             CHECK_REPRODUCIBLE: true
+            OTP_RELEASE: OTP-22.1
         - env:
             OTP_RELEASE: OTP-22.1
         - env:
@@ -89,12 +89,12 @@ test_windows_task:
   matrix:
     - env:
         CHECK_REPRODUCIBLE: true
-        OTP_RELEASE: 22.0
         OS_VERSION: 2019
+        OTP_RELEASE: 22.0
 
     - env:
-        OTP_RELEASE: 21.0.1
         OS_VERSION: 2019
+        OTP_RELEASE: 21.0.1
 
   windows_container:
     image: fertapric/elixir-ci:otp-win64-${OTP_RELEASE}
@@ -117,8 +117,8 @@ test_windows_task:
   test_elixir_script: make --keep-going test_elixir
 
   check_reproducible_script: |
-    if [ -n "$CHECK_REPRODUCIBLE" ]; then
+    IF "%CHECK_REPRODUCIBLE" == "true"(
       make check_reproducible
-    else
-      echo "The format reproducibility of the build is only checked in the last stable Erlang/OTP version."
-    fi
+    ) ELSE (
+      ECHO The format reproducibility of the build is only checked in the last stable Erlang/OTP version.
+    )
