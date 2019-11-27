@@ -117,4 +117,5 @@ test_windows_task:
   # test_elixir_script: make --keep-going test_elixir
 
   check_reproducible_script:
-    - if "%CHECK_REPRODUCIBLE%"=="true" (make check_reproducible) else (echo The format reproducibility of the build is only checked in the last stable Erlang/OTP version.)
+    # - if "%CHECK_REPRODUCIBLE%"=="true" (make check_reproducible) else (echo The format reproducibility of the build is only checked in the last stable Erlang/OTP version.)
+    - make check_reproducible
