@@ -159,5 +159,5 @@ test_freebsd_task:
     if [ -n "$CHECK_REPRODUCIBLE" ]; then
       gmake check_reproducible
     else
-      echo "The format reproducibility of the build is only checked in the last stable Erlang/OTP version."
+      echo "The reproducibility of the build is only checked in the last stable Erlang/OTP version."
     fi
