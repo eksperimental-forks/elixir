@@ -135,8 +135,8 @@ test_freebsd_task:
 
   freebsd_instance:
     image_family: freebsd-12-0
-    cpu: 8
-    memory: 7424Mi
+    #cpu: 8
+    #memory: 7424Mi
 
   env:
     CHECK_REPRODUCIBLE: true
