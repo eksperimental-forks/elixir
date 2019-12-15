@@ -9,7 +9,7 @@ test_template: &DEFAULT_TEST_SETTINGS
   # don't cancel the task execution if it's master or a release branch
   auto_cancellation: $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*'
   env:
-    CIRRUS_CLONE_DEPTH: ($CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*') && 1 || $CIRRUS_BRANCH
+    CIRRUS_CLONE_DEPTH: ($CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*') && 1 || 50
     # CIRRUS_CLONE_DEPTH: if [ $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*' ]; then 1; else 50; fi
 
 test_linux_task:
@@ -54,6 +54,9 @@ test_linux_task:
             OTP_RELEASE: master
         - env:
             OTP_RELEASE: maint
+
+  debug_script:
+    - echo $CIRRUS_CLONE_DEPTH
 
   install_script:
     - wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-14.04/${OTP_RELEASE}.tar.gz
