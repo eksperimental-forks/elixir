@@ -9,7 +9,8 @@ test_template: &DEFAULT_TEST_SETTINGS
   # don't cancel the task execution if it's master or a release branch
   auto_cancellation: $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*'
   env:
-    CIRRUS_CLONE_DEPTH: if [ $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*' ]; then 1; else 50; fi
+    CIRRUS_CLONE_DEPTH: ($CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*') && 1 || $CIRRUS_BRANCH
+    # CIRRUS_CLONE_DEPTH: if [ $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH !=~ 'v\d+\.\d+.*' ]; then 1; else 50; fi
 
 test_linux_task:
   <<: *DEFAULT_TEST_SETTINGS
