@@ -291,19 +291,26 @@ defmodule Keyword do
           {current_value, value}
         when current_value: value
   def get_and_update(keywords, key, fun)
-      when is_list(keywords) and is_atom(key),
-      do: get_and_update(keywords, [], key, fun)
+      when is_list(keywords) and is_atom(key) do
+    case get_and_update(keywords, [], key, fun) do
+      {:keep, current_value} -> {current_value, keywords}
+      result -> result
+    end
+  end
 
-  defp get_and_update([{key, current} | t], acc, key, fun) do
-    case fun.(current) do
+  defp get_and_update([{key, current_value} | t], acc, key, fun) do
+    case fun.(current_value) do
       {get, value} ->
         {get, :lists.reverse(acc, [{key, value} | t])}
 
+      :keep ->
+        {:keep, current_value}
+
       :pop ->
-        {current, :lists.reverse(acc, t)}
+        {current_value, :lists.reverse(acc, t)}
 
       other ->
-        raise "the given function must return a two-element tuple or :pop, got: #{inspect(other)}"
+        raise "the given function must return a two-element tuple, :keep or :pop, got: #{inspect(other)}"
     end
   end
 
@@ -314,11 +321,14 @@ defmodule Keyword do
       {get, update} ->
         {get, [{key, update} | :lists.reverse(acc)]}
 
+      :keep ->
+        {:keep, nil}
+
       :pop ->
         {nil, :lists.reverse(acc)}
 
       other ->
-        raise "the given function must return a two-element tuple or :pop, got: #{inspect(other)}"
+        raise "the given function must return a two-element tuple, :keep or :pop, got: #{inspect(other)}"
     end
   end
 
@@ -355,19 +365,25 @@ defmodule Keyword do
           {current_value, t}
         when current_value: value
   def get_and_update!(keywords, key, fun) do
-    get_and_update!(keywords, key, fun, [])
+    case get_and_update!(keywords, key, fun, []) do
+      {:keep, current_value} -> {current_value, keywords}
+      result -> result
+    end
   end
 
-  defp get_and_update!([{key, value} | keywords], key, fun, acc) do
-    case fun.(value) do
-      {get, value} ->
-        {get, :lists.reverse(acc, [{key, value} | delete(keywords, key)])}
+  defp get_and_update!([{key, current_value} | keywords], key, fun, acc) do
+    case fun.(current_value) do
+      {get, current_value} ->
+        {get, :lists.reverse(acc, [{key, current_value} | delete(keywords, key)])}
+
+      :keep ->
+        {:keep, current_value}
 
       :pop ->
-        {value, :lists.reverse(acc, keywords)}
+        {current_value, :lists.reverse(acc, keywords)}
 
       other ->
-        raise "the given function must return a two-element tuple or :pop, got: #{inspect(other)}"
+        raise "the given function must return a two-element tuple, :keep or :pop, got: #{inspect(other)}"
     end
   end
 

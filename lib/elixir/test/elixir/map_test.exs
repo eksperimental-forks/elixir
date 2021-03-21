@@ -112,19 +112,31 @@ defmodule MapTest do
     assert_raise BadMapError, fn -> Map.split(:foo, []) end
   end
 
-  test "get_and_update/3" do
-    message = "the given function must return a two-element tuple or :pop, got: 1"
+  describe "get_and_update/3" do
+    test "error" do
+      message = "the given function must return a two-element tuple, :keep or :pop, got: 1"
 
-    assert_raise RuntimeError, message, fn ->
-      Map.get_and_update(%{a: 1}, :a, fn value -> value end)
+      assert_raise RuntimeError, message, fn ->
+        Map.get_and_update(%{a: 1}, :a, fn value -> value end)
+      end
+    end
+
+    test "keep" do
+      assert Map.get_and_update(%{a: 1}, :a, fn 1 -> :keep end) == {1, %{a: 1}}
     end
   end
 
-  test "get_and_update!/3" do
-    message = "the given function must return a two-element tuple or :pop, got: 1"
+  describe "get_and_update!/3" do
+    test "error" do
+      message = "the given function must return a two-element tuple, :keep or :pop, got: 1"
 
-    assert_raise RuntimeError, message, fn ->
-      Map.get_and_update!(%{a: 1}, :a, fn value -> value end)
+      assert_raise RuntimeError, message, fn ->
+        Map.get_and_update!(%{a: 1}, :a, fn value -> value end)
+      end
+    end
+
+    test "keep" do
+      assert Map.get_and_update!(%{a: 1}, :a, fn 1 -> :keep end) == {1, %{a: 1}}
     end
   end
 

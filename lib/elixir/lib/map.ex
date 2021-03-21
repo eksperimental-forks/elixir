@@ -865,11 +865,14 @@ defmodule Map do
       {get, update} ->
         {get, put(map, key, update)}
 
+      :keep ->
+        {current, map}
+
       :pop ->
         {current, delete(map, key)}
 
       other ->
-        raise "the given function must return a two-element tuple or :pop, got: #{inspect(other)}"
+        raise "the given function must return a two-element tuple, :keep or :pop, got: #{inspect(other)}"
     end
   end
 
@@ -907,11 +910,14 @@ defmodule Map do
       {get, update} ->
         {get, put(map, key, update)}
 
+      :keep ->
+        {value, map}
+
       :pop ->
         {value, delete(map, key)}
 
       other ->
-        raise "the given function must return a two-element tuple or :pop, got: #{inspect(other)}"
+        raise "the given function must return a two-element tuple, :keep or :pop, got: #{inspect(other)}"
     end
   end
 
