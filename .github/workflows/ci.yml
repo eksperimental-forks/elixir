@@ -15,9 +15,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        otp_release: ['OTP-23.0', 'OTP-22.3', 'OTP-22.0']
+        otp_release: [OTP-23.3, OTP-23.0, OTP-22.3, OTP-22.0]
+        check_reproducible: [false]
         development: [false]
         include:
+          # - otp_release: OTP-23.3
+          #   check_reproducible: true
           - otp_release: master
             development: true
           - otp_release: maint
@@ -50,14 +53,19 @@ jobs:
       - name: Elixir test suite
         run: make test_elixir
       - name: Check reproducible builds
+        if: ${{ matrix.check_reproducible }}
         run: taskset 1 make check_reproducible
-        if: matrix.otp_release == 'OTP-23.0'
 
   test_windows:
     name: Windows, OTP-${{ matrix.otp_release }}, Windows Server 2019
     strategy:
       matrix:
-        otp_release: ['22.0']
+        check_reproducible: [false]
+        include:
+          - otp_release: '22.3'
+            check_reproducible: true
+          - otp_release: '22.0'
+
     runs-on: windows-2019
     steps:
       - name: Configure Git
@@ -84,6 +92,9 @@ jobs:
         run: make --keep-going test_erlang
       - name: Elixir test suite
         run: make --keep-going test_elixir
+      - name: Check reproducible builds
+        if: ${{ matrix.check_reproducible }}
+        run: taskset 1 make check_reproducible
 
   check_posix_compliant:
     name: Check POSIX-compliant
