@@ -12,7 +12,7 @@ test_template: &DEFAULT_TEST_SETTINGS
 test_freebsd_task:
   <<: *DEFAULT_TEST_SETTINGS
 
-  name: FreeBSD 13.0
+  name: FreeBSD 13.0, OTP ${OTP_VERSION}
   alias: FreeBSD Stable
 
   freebsd_instance:
@@ -23,10 +23,14 @@ test_freebsd_task:
   env:
     CHECK_REPRODUCIBLE: true
     LC_ALL: en_US.UTF-8
-    PATH: $PATH:/usr/local/lib/erlang22/bin
+    PATH: "${PATH}:/usr/local/lib/erlang${OTP_VERSION}/bin"
+    matrix:
+      - OTP_VERSION: 22
+      - OTP_VERSION: 23
+
 
   install_script:
-    - pkg install -y erlang-runtime22 git gmake
+    - pkg install -y erlang-runtime${OTP_VERSION} git gmake
     - rm -rf .git
     - gmake compile
 
