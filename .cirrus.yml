@@ -21,13 +21,12 @@ test_freebsd_task:
     memory: 7424Mi
 
   env:
-    CHECK_REPRODUCIBLE: true
     LC_ALL: en_US.UTF-8
     PATH: "${PATH}:/usr/local/lib/erlang${OTP_VERSION}/bin"
     matrix:
-      - OTP_VERSION: 22
       - OTP_VERSION: 23
-
+        CHECK_REPRODUCIBLE: true
+      - OTP_VERSION: 22
 
   install_script:
     - pkg install -y erlang-runtime${OTP_VERSION} git gmake
