@@ -682,6 +682,7 @@ defmodule Protocol do
     quote do
       defmodule unquote(name) do
         @before_compile Protocol
+        @after_compile Protocol
 
         # We don't allow function definition inside protocols
         import Kernel,
@@ -730,7 +731,8 @@ defmodule Protocol do
     {{name, length(args)}, meta}
   end
 
-  defp callback_ast_to_fa({kind, _, _pos}) when kind in [:callback, :macrocallback] do
+  defp callback_ast_to_fa({kind, _, _pos} = term) when kind in [:callback, :macrocallback] do
+    send(self(), {FunctionClauseError, {:callback_ast_to_fa, 1}, [term], kind})
     {nil, nil}
   end
 
@@ -797,6 +799,25 @@ defmodule Protocol do
         env,
         nil
       )
+    end
+  end
+
+  def __after_compile__(env, _bytecode) do
+    receive do
+      {FunctionClauseError, {:callback_ast_to_fa, 1}, args, kind} ->
+        reraise(
+          FunctionClauseError,
+          [
+            module: __MODULE__,
+            function: :callback_ast_to_fa,
+            arity: 1,
+            args: args,
+            kind: kind
+          ],
+          Macro.Env.stacktrace(env)
+        )
+    after
+      0 -> :ok
     end
   end
 
