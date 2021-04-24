@@ -62,7 +62,7 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Configure Git
-        run: git config --global core.autocrlf input
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
         with:
           fetch-depth: 50
