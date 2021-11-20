@@ -389,6 +389,12 @@ defimpl Inspect, for: Function do
   end
 end
 
+defimpl Inspect, for: Inspect.Error do
+  def inspect(_struct, _opts) do
+    "#Inspect.Error<...>"
+  end
+end
+
 defimpl Inspect, for: PID do
   def inspect(pid, _opts) do
     "#PID" <> IO.iodata_to_binary(:erlang.pid_to_list(pid))
