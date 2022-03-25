@@ -67,11 +67,12 @@ jobs:
         with:
           repository: elixir-lang/ex_doc
           ref: ${{ steps.ex_doc.outputs.release }}
-          path: ../ex_doc
+          path: ex_doc
         if: ${{ matrix.build_docs }}
       - name: Build ex_doc
         if: ${{ matrix.build_docs }}
         run: |
+          mv ex_doc ../ex_doc
           cd ../ex_doc
           ../elixir/bin/mix do local.rebar --force + local.hex --force + deps.get + compile
           cd ../elixir
