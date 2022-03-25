@@ -1,119 +1,119 @@
-name: CI
+# name: CI
 
-on: [pull_request, push]
+# on: [pull_request, push]
 
-env:
-  ELIXIR_ASSERT_TIMEOUT: 2000
-  ELIXIRC_OPTS: "--warnings-as-errors"
-  ERLC_OPTS: "warnings_as_errors"
-  LANG: C.UTF-8
+# env:
+#   ELIXIR_ASSERT_TIMEOUT: 2000
+#   ELIXIRC_OPTS: "--warnings-as-errors"
+#   ERLC_OPTS: "warnings_as_errors"
+#   LANG: C.UTF-8
 
-jobs:
-  test_linux:
-    name: Linux, ${{ matrix.otp_release }}, Ubuntu 18.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - otp_release: OTP-24.3
-            otp_latest: true
-          - otp_release: OTP-24.0
-          - otp_release: OTP-23.3
-          - otp_release: OTP-23.0
-          - otp_release: master
-            development: true
-          - otp_release: maint
-            development: true
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 50
-      - name: Install Erlang/OTP
-        run: |
-          cd $RUNNER_TEMP
-          wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-18.04/${{ matrix.otp_release }}.tar.gz
-          mkdir -p otp
-          tar zxf otp.tar.gz -C otp --strip-components=1
-          otp/Install -minimal $(pwd)/otp
-          echo "$(pwd)/otp/bin" >> $GITHUB_PATH
-      - name: Compile Elixir
-        run: |
-          rm -rf .git
-          make compile
-          echo "$PWD/bin" >> $GITHUB_PATH
-      - name: Build info
-        run: bin/elixir --version
-      - name: Check format
-        run: make test_formatted && echo "All Elixir source code files are properly formatted."
-      - name: Run Dialyzer
-        run: dialyzer -pa lib/elixir/ebin --build_plt --output_plt elixir.plt --apps lib/elixir/ebin/elixir.beam lib/elixir/ebin/Elixir.Kernel.beam
-      - name: Erlang test suite
-        run: make test_erlang
-        continue-on-error: ${{ matrix.development }}
-      - name: Elixir test suite
-        run: make test_elixir
-        continue-on-error: ${{ matrix.development }}
-      - name: Check reproducible builds
-        run: taskset 1 make check_reproducible
-        if: ${{ matrix.otp_latest }}
-      - name: Build docs
-        if: ${{ matrix.otp_latest }}
-        run: |
-          cd ..
-          git clone https://github.com/elixir-lang/ex_doc.git --branch main --depth 1
-          cd ex_doc
-          ../elixir/bin/mix do local.rebar --force + local.hex --force + deps.get + compile
-          cd ../elixir/
-          make docs
+# jobs:
+#   test_linux:
+#     name: Linux, ${{ matrix.otp_release }}, Ubuntu 18.04
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         include:
+#           - otp_release: OTP-24.3
+#             otp_latest: true
+#           - otp_release: OTP-24.0
+#           - otp_release: OTP-23.3
+#           - otp_release: OTP-23.0
+#           - otp_release: master
+#             development: true
+#           - otp_release: maint
+#             development: true
+#     runs-on: ubuntu-18.04
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 50
+#       - name: Install Erlang/OTP
+#         run: |
+#           cd $RUNNER_TEMP
+#           wget -O otp.tar.gz https://repo.hex.pm/builds/otp/ubuntu-18.04/${{ matrix.otp_release }}.tar.gz
+#           mkdir -p otp
+#           tar zxf otp.tar.gz -C otp --strip-components=1
+#           otp/Install -minimal $(pwd)/otp
+#           echo "$(pwd)/otp/bin" >> $GITHUB_PATH
+#       - name: Compile Elixir
+#         run: |
+#           rm -rf .git
+#           make compile
+#           echo "$PWD/bin" >> $GITHUB_PATH
+#       - name: Build info
+#         run: bin/elixir --version
+#       - name: Check format
+#         run: make test_formatted && echo "All Elixir source code files are properly formatted."
+#       - name: Run Dialyzer
+#         run: dialyzer -pa lib/elixir/ebin --build_plt --output_plt elixir.plt --apps lib/elixir/ebin/elixir.beam lib/elixir/ebin/Elixir.Kernel.beam
+#       - name: Erlang test suite
+#         run: make test_erlang
+#         continue-on-error: ${{ matrix.development }}
+#       - name: Elixir test suite
+#         run: make test_elixir
+#         continue-on-error: ${{ matrix.development }}
+#       - name: Check reproducible builds
+#         run: taskset 1 make check_reproducible
+#         if: ${{ matrix.otp_latest }}
+#       - name: Build docs
+#         if: ${{ matrix.otp_latest }}
+#         run: |
+#           cd ..
+#           git clone https://github.com/elixir-lang/ex_doc.git --branch main --depth 1
+#           cd ex_doc
+#           ../elixir/bin/mix do local.rebar --force + local.hex --force + deps.get + compile
+#           cd ../elixir/
+#           make docs
 
-  test_windows:
-    name: Windows, OTP-${{ matrix.otp_release }}, Windows Server 2019
-    strategy:
-      matrix:
-        otp_release: ['23.3']
-    runs-on: windows-2019
-    steps:
-      - name: Configure Git
-        run: git config --global core.autocrlf input
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 50
-      - name: Cache Erlang/OTP package
-        uses: actions/cache@v2
-        with:
-          path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey\erlang
-          key: OTP-${{ matrix.otp_release }}-windows-2019
-      - name: Install Erlang/OTP
-        run: choco install -y erlang --version ${{ matrix.otp_release }}
-      - name: Compile Elixir
-        run: |
-          remove-item '.git' -recurse -force
-          make compile
-      - name: Build info
-        run: bin/elixir --version
-      - name: Check format
-        run: make test_formatted && echo "All Elixir source code files are properly formatted."
-      - name: Erlang test suite
-        run: make --keep-going test_erlang
-      - name: Elixir test suite
-        run: |
-          del c:/Windows/System32/drivers/etc/hosts
-          make --keep-going test_elixir
+#   test_windows:
+#     name: Windows, OTP-${{ matrix.otp_release }}, Windows Server 2019
+#     strategy:
+#       matrix:
+#         otp_release: ['23.3']
+#     runs-on: windows-2019
+#     steps:
+#       - name: Configure Git
+#         run: git config --global core.autocrlf input
+#       - uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 50
+#       - name: Cache Erlang/OTP package
+#         uses: actions/cache@v2
+#         with:
+#           path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey\erlang
+#           key: OTP-${{ matrix.otp_release }}-windows-2019
+#       - name: Install Erlang/OTP
+#         run: choco install -y erlang --version ${{ matrix.otp_release }}
+#       - name: Compile Elixir
+#         run: |
+#           remove-item '.git' -recurse -force
+#           make compile
+#       - name: Build info
+#         run: bin/elixir --version
+#       - name: Check format
+#         run: make test_formatted && echo "All Elixir source code files are properly formatted."
+#       - name: Erlang test suite
+#         run: make --keep-going test_erlang
+#       - name: Elixir test suite
+#         run: |
+#           del c:/Windows/System32/drivers/etc/hosts
+#           make --keep-going test_elixir
 
-  check_posix_compliant:
-    name: Check POSIX-compliant
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 50
-      - name: Install Shellcheck
-        run: |
-          sudo apt update
-          sudo apt install -y shellcheck
-      - name: Check POSIX-compliant
-        run: |
-          shellcheck -e SC2039,2086 bin/elixir && echo "bin/elixir is POSIX compliant"
-          shellcheck bin/elixirc && echo "bin/elixirc is POSIX compliant"
-          shellcheck bin/iex && echo "bin/iex is POSIX compliant"
+#   check_posix_compliant:
+#     name: Check POSIX-compliant
+#     runs-on: ubuntu-18.04
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 50
+#       - name: Install Shellcheck
+#         run: |
+#           sudo apt update
+#           sudo apt install -y shellcheck
+#       - name: Check POSIX-compliant
+#         run: |
+#           shellcheck -e SC2039,2086 bin/elixir && echo "bin/elixir is POSIX compliant"
+#           shellcheck bin/elixirc && echo "bin/elixirc is POSIX compliant"
+#           shellcheck bin/iex && echo "bin/iex is POSIX compliant"
