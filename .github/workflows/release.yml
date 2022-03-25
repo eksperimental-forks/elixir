@@ -58,16 +58,20 @@ jobs:
           gh release upload --clobber "${{ github.ref_name }}" \
             elixir-otp-${{ matrix.otp }}.zip \
             elixir-otp-${{ matrix.otp }}.zip.sha{1,256}sum
+      - id: ex_doc
+        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        with:
+          repository: elixir-lang/ex_doc
+          excludes: prerelease, draft
       - uses: actions/checkout@v2
         with:
           repository: elixir-lang/ex_doc
-          ref: v0.26.0
-          path: ex_doc
+          ref: ${{ steps.ex_doc.outputs.release }}
+          path: ../ex_doc
         if: ${{ matrix.build_docs }}
       - name: Build ex_doc
         if: ${{ matrix.build_docs }}
         run: |
-          mv ex_doc ../ex_doc
           cd ../ex_doc
           ../elixir/bin/mix do local.rebar --force + local.hex --force + deps.get + compile
           cd ../elixir
