@@ -58,17 +58,17 @@ jobs:
           gh release upload --clobber "${{ github.ref_name }}" \
             elixir-otp-${{ matrix.otp }}.zip \
             elixir-otp-${{ matrix.otp }}.zip.sha{1,256}sum
-      - id: ex_doc
-        uses: pozetroninc/github-action-get-latest-release@v0.5.0
-        with:
-          repository: elixir-lang/ex_doc
-          excludes: prerelease, draft
-      - uses: actions/checkout@v2
-        with:
-          repository: elixir-lang/ex_doc
-          ref: ${{ steps.ex_doc.outputs.release }}
-          path: ex_doc
+      - name: Get latest stable ExDoc version
         if: ${{ matrix.build_docs }}
+        run: |
+          EX_DOC_LATEST_STABLE_VERSION=$(curl -s https://hex.pm/api/packages/ex_doc | jq --raw-output '.latest_stable_version')
+          echo "EX_DOC_LATEST_STABLE_VERSION=${EX_DOC_LATEST_STABLE_VERSION}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+        if: ${{ matrix.build_docs }}
+        with:
+          repository: elixir-lang/ex_doc
+          ref: v${{ env.EX_DOC_LATEST_STABLE_VERSION }}
+          path: ex_doc
       - name: Build ex_doc
         if: ${{ matrix.build_docs }}
         run: |
