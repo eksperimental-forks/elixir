@@ -14,6 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        ex_doc: [main, latest_stable]
         include:
           - otp_release: OTP-24.3
             otp_latest: true
@@ -57,6 +58,29 @@ jobs:
       - name: Check reproducible builds
         run: taskset 1 make check_reproducible
         if: ${{ matrix.otp_latest }}
+      - name: Get latest stable ExDoc version
+        if: ${{ matrix.otp_latest && matrix.ex_doc == 'latest_stable' }}
+        run: |
+          EX_DOC_LATEST_STABLE_VERSION=$(curl -s https://hex.pm/api/packages/ex_doc | jq --raw-output '.latest_stable_version')
+          echo "EX_DOC_LATEST_STABLE_VERSION=${EX_DOC_LATEST_STABLE_VERSION}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+        if: ${{ matrix.otp_latest && matrix.ex_doc == 'latest_stable' }}
+        with:
+          repository: elixir-lang/ex_doc
+          ref: v${{ env.EX_DOC_LATEST_STABLE_VERSION }}
+          path: ex_doc
+      - uses: actions/checkout@v2
+        if: ${{ matrix.otp_latest && matrix.ex_doc == 'main' }}
+        with:
+          repository: elixir-lang/ex_doc
+          path: ex_doc
+      - name: Build ex_doc
+        if: ${{ matrix.build_docs }}
+        run: |
+          mv ex_doc ../ex_doc
+          cd ../ex_doc
+          ../elixir/bin/mix do local.rebar --force + local.hex --force + deps.get + compile
+          cd ../elixir
       - name: Build docs
         if: ${{ matrix.otp_latest }}
         run: |
