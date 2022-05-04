@@ -3212,9 +3212,56 @@ defmodule Enum do
         when mapped_element: element
   def sort_by(enumerable, mapper, sorter \\ &<=/2) do
     enumerable
-    |> map(&{&1, mapper.(&1)})
-    |> List.keysort(1, sorter)
+    |> sort_map_keysort(mapper, sorter)
     |> map(&elem(&1, 0))
+  end
+
+  @spec map_sort_by(
+          t,
+          (element -> mapped_element),
+          (element, element -> boolean) | :asc | :desc | module() | {:asc | :desc, module()}
+        ) ::
+          [mapped_element]
+        when mapped_element: element
+  def map_sort_by(enumerable, mapper, sorter \\ &<=/2) do
+    enumerable
+    |> sort_map_keysort(mapper, sorter)
+    |> map(&elem(&1, 1))
+  end
+
+  @doc ~S"""
+  Sorts the mapped results of the `enumerable` according to the provided `sorter`
+  function and later each element is tranformed by applying the `transformer` function.
+
+  This function maps each element of the `enumerable` using the
+  provided `mapper` function. The enumerable is then sorted by
+  the mapped elements using the `sorter`, which defaults
+  to [`&<=/2`](`<=/2`). Lastly, each element is tranformed by applying
+  the `transformer` function.
+
+  This function is an optimization built on top of `sort_by/3`,
+  please read the its documentation for more details on how it works.
+
+  ## Examples
+
+  Using the default `sorter` of [`&<=/2`](`<=/2`) :
+
+      iex> Enum.sort_by_transform(["some", "kind", "of", "monster"], &byte_size/1, &(&1 <> " (#{byte_size(&1)})"))
+      ["of (2)", "some (4)", "kind (4)", "monster (7)"]
+
+  """
+  @spec sort_by_transform(
+          t,
+          (element -> mapped_element),
+          (element -> transformed_element),
+          (element, element -> boolean) | :asc | :desc | module() | {:asc | :desc, module()}
+        ) ::
+          [transformed_element]
+        when mapped_element: element, transformed_element: element
+  def sort_by_transform(enumerable, mapper, transformer, sorter \\ &<=/2) do
+    enumerable
+    |> sort_map_keysort(mapper, sorter)
+    |> map(&transformer.(elem(&1, 0)))
   end
 
   @doc """
@@ -3936,7 +3983,8 @@ defmodule Enum do
 
   ## Helpers
 
-  @compile {:inline, entry_to_string: 1, reduce: 3, reduce_by: 3, reduce_enumerable: 3}
+  @compile {:inline,
+            entry_to_string: 1, reduce: 3, reduce_by: 3, reduce_enumerable: 3, sort_map_keysort: 3}
 
   defp entry_to_string(entry) when is_binary(entry), do: entry
   defp entry_to_string(entry), do: String.Chars.to_string(entry)
@@ -4571,6 +4619,12 @@ defmodule Enum do
   end
 
   defp sort_merge2(h1, t1, [], m, _fun, _bool), do: :lists.reverse(t1, [h1 | m])
+
+  defp sort_map_keysort(enumerable, mapper, sorter) do
+    enumerable
+    |> map(&{&1, mapper.(&1)})
+    |> List.keysort(1, sorter)
+  end
 
   ## split
 
