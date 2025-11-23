@@ -12,7 +12,9 @@ Elixir libraries meant to be consumed by other developers.
 
 You can create a new Elixir library by running the `mix new` command:
 
-    $ mix new my_library
+```shell
+mix new my_library
+```
 
 The project name is given in the `snake_case` convention where all letters are lowercase and words are separate with underscores. This is the same convention used by variables, function names and atoms in Elixir. See the [Naming Conventions](naming-conventions.md) document for more information.
 

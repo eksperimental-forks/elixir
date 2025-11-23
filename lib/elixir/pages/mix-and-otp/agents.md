@@ -25,8 +25,8 @@ Here, we will use agents, and create a module named `KV.Bucket`, responsible for
 
 `Agent`s are simple wrappers around state. If all you want from a process is to keep state, agents are a great fit. Let's start a `iex` session inside the project with:
 
-```console
-$ iex -S mix
+```shell
+iex -S mix
 ```
 
 And play a bit with agents:

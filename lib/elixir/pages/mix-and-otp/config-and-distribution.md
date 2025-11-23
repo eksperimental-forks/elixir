@@ -84,8 +84,8 @@ Elixir ships with facilities to connect nodes and exchange information between t
 
 In order to run distributed code, we need to start the VM with a name. The name can be short (when in the same network) or long (requires the full computer address). Let's start a new IEx session:
 
-```console
-$ iex --sname foo
+```shell
+iex --sname foo
 ```
 
 You can see now the prompt is slightly different and shows the node name followed by the computer name:
@@ -105,8 +105,8 @@ iex> defmodule Hello do
 
 If you have another computer on the same network with both Erlang and Elixir installed, you can start another shell on it. If you don't, you can start another IEx session in another terminal. In either case, give it the short name of `bar`:
 
-```console
-$ iex --sname bar
+```shell
+iex --sname bar
 ```
 
 Note that inside this new IEx session, we cannot access `Hello.world/0`:
@@ -149,14 +149,14 @@ In other words, we can spawn processes in other nodes, hold onto their PIDs, and
 
 First, let's check that our code is not currently distributed. Start a new node like this:
 
-```console
-$ PORT=4100 iex --sname foo -S mix
+```shell
+PORT=4100 iex --sname foo -S mix
 ```
 
 And the other like this:
 
-```console
-$ PORT=4101 iex --sname bar -S mix
+```shell
+PORT=4101 iex --sname bar -S mix
 ```
 
 Now, within `foo@computer-name`, do this:
@@ -279,9 +279,9 @@ Now, in your `start/2` callback, we will add this to of the `start/2` function:
 
 Now we can start our nodes as:
 
-```console
-$ NODES="foo@computer-name,bar@computer-name" PORT=4040 iex --sname foo -S mix
-$ NODES="foo@computer-name,bar@computer-name" PORT=4041 iex --sname bar -S mix
+```shell
+NODES="foo@computer-name,bar@computer-name" PORT=4040 iex --sname foo -S mix
+NODES="foo@computer-name,bar@computer-name" PORT=4041 iex --sname bar -S mix
 ```
 
 And they should connect to each other. Give it a try!

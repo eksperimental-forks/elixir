@@ -481,6 +481,6 @@ end
 
 Additionally, if a Mix task is available, you can also accept these options as command line arguments (see `OptionParser`):
 
-```bash
+```shell
 mix linter --output-file /path/to/output.json --verbosity 3
 ```

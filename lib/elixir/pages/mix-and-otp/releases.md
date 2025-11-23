@@ -78,12 +78,12 @@ Releases also provide built-in hooks for configuring almost every need of the pr
 
 In this case, we already have specified a `config/runtime.exs` that deals with both `PORT` and `NODES` environment variables. Furthermore, while releases don't accept a `--sname` parameter, they do allow us to set the name via the `RELEASE_NODE` env var. Therefore, we can start two copies of the system by jumping into `_build/prod/rel/kv` and typing this (remember to adjust `@computer-name` to your actual computer name):
 
-```console
-$ NODES="foo@computer-name,bar@computer-name" PORT=4040 RELEASE_NODE="foo" bin/kv start_iex
+```shell
+NODES="foo@computer-name,bar@computer-name" PORT=4040 RELEASE_NODE="foo" bin/kv start_iex
 ```
 
-```console
-$ NODES="foo@computer-name,bar@computer-name" PORT=4041 RELEASE_NODE="bar" bin/kv start_iex
+```shell
+NODES="foo@computer-name,bar@computer-name" PORT=4041 RELEASE_NODE="bar" bin/kv start_iex
 ```
 
 To verify it all worked out, you can type `Node.list` in the IEx section and see if it returns the other node. If it doesn't, you can start diagnosing, first by comparing the node names within each `iex>` prompt and calling `Node.connect/1` directly. With applications running, you can `telnet` into them as usual too.

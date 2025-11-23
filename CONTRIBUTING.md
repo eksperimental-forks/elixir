@@ -31,7 +31,7 @@ If you are only changing one file, you can choose to compile and run tests
 for that specific file for faster development cycles. For example, if you
 are changing the String module, you can compile it and run its tests as:
 
-```sh
+```shell
 bin/elixirc lib/elixir/lib/string.ex -o lib/elixir/ebin
 bin/elixir lib/elixir/test/elixir/string_test.exs
 ```
@@ -39,19 +39,19 @@ bin/elixir lib/elixir/test/elixir/string_test.exs
 Some test files need their `test_helper.exs` to be explicitly required
 before, such as:
 
-```sh
+```shell
 bin/elixir -r lib/logger/test/test_helper.exs lib/logger/test/logger_test.exs
 ```
 
 You can also use the `LINE` env var to run a single test:
 
-```sh
+```shell
 LINE=123 bin/elixir lib/elixir/test/elixir/string_test.exs
 ````
 
 To recompile all (including Erlang modules):
 
-```sh
+```shell
 make compile
 ```
 
@@ -62,7 +62,7 @@ all files are properly formatted, then run the full suite with
 If your contribution fails during the bootstrapping of the language,
 you can rebuild the language from scratch with:
 
-```sh
+```shell
 make clean_elixir compile
 ```
 
@@ -188,7 +188,7 @@ is installed and built alongside Elixir.
 
 After cloning and compiling Elixir, run:
 
-```sh
+```shell
 elixir_dir=$(pwd)
 cd .. && git clone https://github.com/elixir-lang/ex_doc.git
 cd ex_doc && "${elixir_dir}/bin/elixir" "${elixir_dir}/bin/mix" do deps.get + compile

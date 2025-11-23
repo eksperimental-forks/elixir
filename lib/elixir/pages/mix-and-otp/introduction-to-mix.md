@@ -60,8 +60,8 @@ When you install Elixir, besides getting the `elixir`, `elixirc`, and `iex` exec
 
 Let's create our first project by invoking `mix new` from the command line. We'll pass the project path as the argument (`kv`, in this case). By default, the application name and module name will be retrieved from the path. So we tell Mix that our main module should be the all-uppercase `KV`, instead of the default, which would have been `Kv`:
 
-```console
-$ mix new kv --module KV
+```shell
+mix new kv --module KV
 ```
 
 Mix will create a directory named `kv` with a few files in it:
@@ -149,9 +149,9 @@ end
 
 This structure is enough to compile our project:
 
-```console
-$ cd kv
-$ mix compile
+```shell
+cd kv
+mix compile
 ```
 
 Will output:
@@ -165,8 +165,8 @@ The `lib/kv.ex` file was compiled and an application manifest named `kv.app` was
 
 Once the project is compiled, you can start a `iex` session inside the project by running the command below. The `-S mix` is necessary to load the project in the interactive shell:
 
-```console
-$ iex -S mix
+```shell
+iex -S mix
 ```
 
 We are going to work on this `kv` project, making modifications and trying out the latest changes from a `iex` session. While you may start a new session whenever there are changes to the project source code, you can also recompile the project from within `iex` with the `recompile` helper, like this:
@@ -257,8 +257,8 @@ For each failure, ExUnit prints a detailed report, containing the test name with
 
 In the second line of the failure, right below the test name, there is the location where the test was defined. If you copy the test location in full, including the file and line number, and append it to `mix test`, Mix will load and run just that particular test:
 
-```console
-$ mix test test/kv_test.exs:5
+```shell
+mix test test/kv_test.exs:5
 ```
 
 This shortcut will be extremely useful as we build our project, allowing us to quickly iterate by running a single test.
@@ -303,8 +303,8 @@ When true, the `:start_permanent` option starts your application in permanent mo
 
 Mix will default to the `:dev` environment, except for the `test` task that will default to the `:test` environment. The environment can be changed via the `MIX_ENV` environment variable:
 
-```console
-$ MIX_ENV=prod mix compile
+```shell
+MIX_ENV=prod mix compile
 ```
 
 Or on Windows:
@@ -321,9 +321,9 @@ Or on Windows:
 
 There is much more to Mix, and we will continue to explore it as we build our project. A general overview is available on the [Mix documentation](`Mix`) and you can always invoke the help task to list all available tasks:
 
-```console
-$ mix help
-$ mix help compile
+```shell
+mix help
+mix help compile
 ```
 
 Now let's move forward and add the first modules and functions to our application.

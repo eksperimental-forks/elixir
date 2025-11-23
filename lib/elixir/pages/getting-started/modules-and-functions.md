@@ -45,14 +45,14 @@ IO.puts Math.sum(1, 2)
 
 And execute it as:
 
-```console
-$ elixir math.exs
+```shell
+elixir math.exs
 ```
 
 You can also load the file within `iex` by running:
 
-```console
-$ iex math.exs
+```shell
+iex math.exs
 ```
 
 And then have direct access to the `Math` module.

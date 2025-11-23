@@ -35,8 +35,8 @@ The function receives the arguments and passes them to `if/2`. However, as we le
 
 Let's start `iex` with the module above:
 
-```console
-$ iex macros.exs
+```shell
+iex macros.exs
 ```
 
 and play with those definitions:

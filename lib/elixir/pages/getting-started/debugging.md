@@ -111,14 +111,14 @@ While `dbg` provides conveniences around Elixir constructs, you will need `IEx` 
 
 When using `IEx`, you may pass `--dbg pry` as an option to "stop" the code execution where the `dbg` call is:
 
-```console
-$ iex --dbg pry
+```shell
+iex --dbg pry
 ```
 
 Or to debug inside of a project:
 
-```console
-$ iex --dbg pry -S mix
+```shell
+iex --dbg pry -S mix
 ```
 
 Now any call to `dbg` will ask if you want to pry the existing code. If you accept, you'll be able to access all variables, as well as imports and aliases from the code, directly from IEx. This is called "prying". While the pry session is running, the code execution stops, until `continue` (or `c`) or `next` (or `n`) are called. Remember you can always run `iex` in the context of a project with `iex -S mix TASK`.
@@ -139,11 +139,12 @@ The `mix test` task direct integration with breakpoints via the `-b`/`--breakpoi
 
 Here are some commands you can use in practice:
 
-```console
+```shell
 # Debug all failed tests
-$ iex -S mix test --breakpoints --failed
+iex -S mix test --breakpoints --failed
+
 # Debug the test at the given file:line
-$ iex -S mix test -b path/to/file:line
+iex -S mix test -b path/to/file:line
 ```
 
 ## Observer

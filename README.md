@@ -100,7 +100,7 @@ However, if you want to contribute to Elixir, you will need to compile from sour
 First, [install Erlang](https://elixir-lang.org/install.html#installing-erlang).
 After that, clone this repository to your machine, compile and test it:
 
-```sh
+```shell
 git clone https://github.com/elixir-lang/elixir.git
 cd elixir
 make
