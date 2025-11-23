@@ -221,7 +221,7 @@ defmodule Mix.Tasks.Release do
 
   The following commands are supported by `bin/RELEASE_NAME`:
 
-  ```text
+  ```console
   start        Starts the system
   start_iex    Starts the system with IEx attached
   daemon       Starts the system as a daemon (Unix-like only)
@@ -544,7 +544,7 @@ defmodule Mix.Tasks.Release do
   if you want to make sure the Erlang Distribution listens only on
   a given port known at runtime, you can set the following:
 
-  ```bash
+  ```sh
   case $RELEASE_COMMAND in
     start*|daemon*)
       ELIXIR_ERL_OPTIONS="-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT"
@@ -562,7 +562,7 @@ defmodule Mix.Tasks.Release do
 
   On Windows, your `env.bat` would look like this:
 
-  ```bash
+  ```batch
   IF NOT %RELEASE_COMMAND:start=%==%RELEASE_COMMAND% (
     set ELIXIR_ERL_OPTIONS="-kernel inet_dist_listen_min %BEAM_PORT% inet_dist_listen_max %BEAM_PORT%"
   )
@@ -571,13 +571,13 @@ defmodule Mix.Tasks.Release do
   Inside `env.sh` and `env.bat` files you can access command-line arguments given to release commands.
   For example, given this `env.sh.eex`:
 
-  ```bash
+  ```sh
   echo $@
   ```
 
   or this `env.bat.eex`:
 
-  ```bash
+  ```batch
   echo %*
   ```
 

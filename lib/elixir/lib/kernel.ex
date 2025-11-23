@@ -235,7 +235,7 @@ defmodule Kernel do
 
   ### Term ordering
 
-  ```
+  ```text
   number < atom < reference < function < port < pid < tuple < map < list < bitstring
   ```
 
@@ -6110,7 +6110,7 @@ defmodule Kernel do
   For convenience, the markup notation to generate the admonition block
   above is:
 
-  ```
+  ```text
   > #### `use GenServer` {: .info}
   >
   > When you `use GenServer`, the GenServer module will

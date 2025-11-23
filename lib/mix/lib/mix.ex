@@ -103,8 +103,8 @@ defmodule Mix do
   The environment can be changed via the command line by setting
   the `MIX_ENV` environment variable, for example:
 
-  ```bash
-  $ MIX_ENV=prod mix run server.exs
+  ```shell
+  MIX_ENV=prod mix run server.exs
   ```
 
   You can also specify that certain dependencies are available only for
@@ -407,7 +407,7 @@ defmodule Mix do
 
   You can also do so by setting the `ERL_AFLAGS` and `ERL_ZFLAGS` environment variables:
 
-  ```bash
+  ```sh
   ERL_AFLAGS="-public_key cacerts_path '\"/path/to/certs.pem\"'"
   ERL_ZFLAGS="-public_key cacerts_path '\"/path/to/certs.pem\"'"
   ```
