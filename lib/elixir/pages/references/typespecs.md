@@ -34,15 +34,17 @@ See the "User-defined types" and "Defining a specification" sub-sections below f
 
 ## A simple example
 
-    defmodule StringHelpers do
-      @typedoc "A word from the dictionary"
-      @type word() :: String.t()
+```elixir
+defmodule StringHelpers do
+  @typedoc "A word from the dictionary"
+  @type word() :: String.t()
 
-      @spec long_word?(word()) :: boolean()
-      def long_word?(word) when is_binary(word) do
-        String.length(word) > 8
-      end
-    end
+  @spec long_word?(word()) :: boolean()
+  def long_word?(word) when is_binary(word) do
+    String.length(word) > 8
+  end
+end
+```
 
 In the example above:
 
@@ -72,77 +74,72 @@ The notation to represent the union of types is the pipe `|`. For example, the t
 
 ### Basic types
 
-    type ::
-          any()                     # the top type, the set of all terms
-          | none()                  # the bottom type, contains no terms
-          | atom()
-          | map()                   # any map
-          | pid()                   # process identifier
-          | port()                  # port identifier
-          | reference()
-          | tuple()                 # tuple of any size
-
-                                    ## Numbers
-          | float()
-          | integer()
-          | neg_integer()           # ..., -3, -2, -1
-          | non_neg_integer()       # 0, 1, 2, 3, ...
-          | pos_integer()           # 1, 2, 3, ...
-
-                                                                          ## Lists
-          | list(type)                                                    # proper list ([]-terminated)
-          | nonempty_list(type)                                           # non-empty proper list
-          | maybe_improper_list(content_type, termination_type)           # proper or improper list
-          | nonempty_improper_list(content_type, termination_type)        # improper list
-          | nonempty_maybe_improper_list(content_type, termination_type)  # non-empty proper or improper list
-
-          | Literals                # Described in section "Literals"
-          | BuiltIn                 # Described in section "Built-in types"
-          | Remotes                 # Described in section "Remote types"
-          | UserDefined             # Described in section "User-defined types"
+```elixir
+type ::
+      any()                     # the top type, the set of all terms
+      | none()                  # the bottom type, contains no terms
+      | atom()
+      | map()                   # any map
+      | pid()                   # process identifier
+      | port()                  # port identifier
+      | reference()
+      | tuple()                 # tuple of any size
+                                ## Numbers
+      | float()
+      | integer()
+      | neg_integer()           # ..., -3, -2, -1
+      | non_neg_integer()       # 0, 1, 2, 3, ...
+      | pos_integer()           # 1, 2, 3, ...
+                                                                      ## Lists
+      | list(type)                                                    # proper list ([]-terminated)
+      | nonempty_list(type)                                           # non-empty proper list
+      | maybe_improper_list(content_type, termination_type)           # proper or improper list
+      | nonempty_improper_list(content_type, termination_type)        # improper list
+      | nonempty_maybe_improper_list(content_type, termination_type)  # non-empty proper or improper list
+      | Literals                # Described in section "Literals"
+      | BuiltIn                 # Described in section "Built-in types"
+      | Remotes                 # Described in section "Remote types"
+      | UserDefined             # Described in section "User-defined types"
+```
 
 ### Literals
 
 The following literals are also supported in typespecs:
 
-    type ::                               ## Atoms
-          :atom                           # atoms: :foo, :bar, ...
-          | true | false | nil            # special atom literals
-
-                                          ## Bitstrings
-          | <<>>                          # empty bitstring
-          | <<_::size>>                   # size is 0 or a positive integer
-          | <<_::_*unit>>                 # unit is an integer from 1 to 256
-          | <<_::size, _::_*unit>>
-
-                                          ## (Anonymous) Functions
-          | (-> type)                     # zero-arity, returns type
-          | (type1, type2 -> type)        # two-arity, returns type
-          | (... -> type)                 # any arity, returns type
-
-                                          ## Integers
-          | 1                             # integer
-          | 1..10                         # integer from 1 to 10
-
-                                          ## Lists
-          | [type]                        # list with any number of type elements
-          | []                            # empty list
-          | [...]                         # shorthand for nonempty_list(any())
-          | [type, ...]                   # shorthand for nonempty_list(type)
-          | [key: value_type]             # keyword list with optional key :key of value_type
-
-                                                  ## Maps
-          | %{}                                   # empty map
-          | %{key: value_type}                    # map with required key :key of value_type
-          | %{key_type => value_type}             # map with required pairs of key_type and value_type
-          | %{required(key_type) => value_type}   # map with required pairs of key_type and value_type
-          | %{optional(key_type) => value_type}   # map with optional pairs of key_type and value_type
-          | %SomeStruct{}                         # struct with all fields of any type
-          | %SomeStruct{key: value_type}          # struct with required key :key of value_type
-
-                                          ## Tuples
-          | {}                            # empty tuple
-          | {:ok, type}                   # two-element tuple with an atom and any type
+```elixir
+type ::                               ## Atoms
+      :atom                           # atoms: :foo, :bar, ...
+      | true | false | nil            # special atom literals
+                                      ## Bitstrings
+      | <<>>                          # empty bitstring
+      | <<_::size>>                   # size is 0 or a positive integer
+      | <<_::_*unit>>                 # unit is an integer from 1 to 256
+      | <<_::size, _::_*unit>>
+                                      ## (Anonymous) Functions
+      | (-> type)                     # zero-arity, returns type
+      | (type1, type2 -> type)        # two-arity, returns type
+      | (... -> type)                 # any arity, returns type
+                                      ## Integers
+      | 1                             # integer
+      | 1..10                         # integer from 1 to 10
+                                      ## Lists
+      | [type]                        # list with any number of type elements
+      | []                            # empty list
+      | [...]                         # shorthand for nonempty_list(any())
+      | [type, ...]                   # shorthand for nonempty_list(type)
+      | [key: value_type]             # keyword list with optional key :key of value_type
+                                              ## Maps
+      | %{}                                   # empty map
+      | %{key: value_type}                    # map with required key :key of value_type
+      | %{key_type => value_type}             # map with required pairs of key_type and value_type
+      | %{required(key_type) => value_type}   # map with required pairs of key_type and value_type
+      | %{optional(key_type) => value_type}   # map with optional pairs of key_type and value_type
+      | %SomeStruct{}                         # struct with all fields of any type
+      | %SomeStruct{key: value_type}          # struct with required key :key of value_type
+                                      ## Tuples
+      | {}                            # empty tuple
+      | {:ok, type}                   # two-element tuple with an atom and any type
+```
 
 ### Built-in types
 
@@ -234,45 +231,61 @@ The following spec syntaxes are equivalent:
 
 The `@type`, `@typep`, and `@opaque` module attributes can be used to define new types:
 
-    @type type_name :: type
-    @typep type_name :: type
-    @opaque type_name :: type
+```elixir
+@type type_name :: type
+@typep type_name :: type
+@opaque type_name :: type
+```
 
 A type defined with `@typep` is private. An opaque type, defined with `@opaque` is a type where the internal structure of the type will not be visible, but the type is still public.
 
 Types can be parameterized by defining variables as parameters; these variables can then be used to define the type.
 
-    @type dict(key, value) :: [{key, value}]
+```elixir
+@type dict(key, value) :: [{key, value}]
+```
 
 ## Defining a specification
 
 A specification for a function can be defined as follows:
 
-    @spec function_name(type1, type2) :: return_type
+```elixir
+@spec function_name(type1, type2) :: return_type
+```
 
 Guards can be used to restrict type variables given as arguments to the function.
 
-    @spec function(arg) :: [arg] when arg: atom
+```elixir
+@spec function(arg) :: [arg] when arg: atom
+```
 
 If you want to specify more than one variable, you separate them by a comma.
 
-    @spec function(arg1, arg2) :: {arg1, arg2} when arg1: atom, arg2: integer
+```elixir
+@spec function(arg1, arg2) :: {arg1, arg2} when arg1: atom, arg2: integer
+```
 
 Type variables with no restriction can also be defined using `var`.
 
-    @spec function(arg) :: [arg] when arg: var
+```elixir
+@spec function(arg) :: [arg] when arg: var
+```
 
 This guard notation only works with `@spec`, `@callback`, and `@macrocallback`.
 
 You can also name your arguments in a typespec using `arg_name :: arg_type` syntax. This is particularly useful in documentation as a way to differentiate multiple arguments of the same type (or multiple elements of the same type in a type definition):
 
-    @spec days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
-    @type color :: {red :: integer, green :: integer, blue :: integer}
+```elixir
+@spec days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
+@type color :: {red :: integer, green :: integer, blue :: integer}
+```
 
 Specifications can be overloaded, just like ordinary functions.
 
-    @spec function(integer) :: atom
-    @spec function(atom) :: integer
+```elixir
+@spec function(integer) :: atom
+@spec function(atom) :: integer
+```
 
 ## Behaviours
 
@@ -398,12 +411,14 @@ Optional callbacks are callbacks that callback modules may implement if they wan
 
 Optional callbacks can be defined through the `@optional_callbacks` module attribute, which has to be a keyword list with function or macro name as key and arity as value. For example:
 
-    defmodule MyBehaviour do
-      @callback vital_fun() :: any
-      @callback non_vital_fun() :: any
-      @macrocallback non_vital_macro(arg :: any) :: Macro.t
-      @optional_callbacks non_vital_fun: 0, non_vital_macro: 1
-    end
+```elixir
+defmodule MyBehaviour do
+  @callback vital_fun() :: any
+  @callback non_vital_fun() :: any
+  @macrocallback non_vital_macro(arg :: any) :: Macro.t
+  @optional_callbacks non_vital_fun: 0, non_vital_macro: 1
+end
+```
 
 One example of optional callback in Elixir's standard library is `c:GenServer.format_status/1`.
 
@@ -413,10 +428,13 @@ The `@callback` and `@optional_callbacks` attributes are used to create a `behav
 
 For example, for the `MyBehaviour` module defined in "Optional callbacks" above:
 
-    MyBehaviour.behaviour_info(:callbacks)
-    #=> [vital_fun: 0, "MACRO-non_vital_macro": 2, non_vital_fun: 0]
-    MyBehaviour.behaviour_info(:optional_callbacks)
-    #=> ["MACRO-non_vital_macro": 2, non_vital_fun: 0]
+```elixir
+MyBehaviour.behaviour_info(:callbacks)
+#=> [vital_fun: 0, "MACRO-non_vital_macro": 2, non_vital_fun: 0]
+
+MyBehaviour.behaviour_info(:optional_callbacks)
+#=> ["MACRO-non_vital_macro": 2, non_vital_fun: 0]
+```
 
 When using `iex`, the `IEx.Helpers.b/1` helper is also available.
 

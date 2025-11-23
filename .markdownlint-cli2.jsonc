@@ -5,7 +5,8 @@
     "**/*.md"
   ],
   "ignores": [
-    ".git/**"
+    ".git/**",
+    "lib/*/test/fixtures/*.md"
   ],
   "gitignore": true,
   "config": {
@@ -54,8 +55,12 @@
     },
     // This warns if you have spaces in code blocks. Sometimes, that's fine.
     "MD038": false,
-    // Code block style. We don't care if it's fenced or indented.
-    "MD046": false,
+    //
+    // Code block style.
+    "MD046": {
+      "style": "fenced"
+    },
+    //
     // Our tables are too large to align.
     "MD060": false
   }

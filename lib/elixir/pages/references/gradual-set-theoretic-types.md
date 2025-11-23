@@ -71,8 +71,10 @@ If the `tail_type` is anything but a list, then we have an improper list. For ex
 
 While most developers will simply use `list(a)`, the type system can express all different representations of lists in Elixir. At the end of the day, `list()` and `improper_list()` are translations to the following constructs:
 
-    list() == empty_list() or non_empty_list(term())
-    improper_list() == non_empty_list(term(), term() and not list())
+```elixir
+list() == empty_list() or non_empty_list(term())
+improper_list() == non_empty_list(term(), term() and not list())
+```
 
 ### Maps
 

@@ -15,8 +15,10 @@ follow and set best practices for language and the community. If instead you wan
 
 Elixir developers must use `snake_case` when defining variables, function names, module attributes, and the like:
 
-    some_map = %{this_is_a_key: "and a value"}
-    is_map(some_map)
+```elixir
+some_map = %{this_is_a_key: "and a value"}
+is_map(some_map)
+```
 
 Aliases, commonly used as module names, are an exception as they must be capitalized and written in `CamelCase`, like `OptionParser`. For aliases, capital letters are kept in acronyms, like `ExUnit.CaptureIO` or `Mix.SCM`.
 
@@ -30,24 +32,30 @@ Elixir relies on underscores in different situations.
 
 For example, a value that is not meant to be used must be assigned to `_` or to a variable starting with underscore:
 
-    iex> {:ok, _contents} = File.read("README.md")
+```elixir
+iex> {:ok, _contents} = File.read("README.md")
+```
 
 Function names may also start with an underscore. Such functions are never imported by default:
 
-    iex> defmodule Example do
-    ...>   def _wont_be_imported do
-    ...>     :oops
-    ...>   end
-    ...> end
+```elixir
+iex> defmodule Example do
+...>   def _wont_be_imported do
+...>     :oops
+...>   end
+...> end
 
-    iex> import Example
-    iex> _wont_be_imported()
-    ** (CompileError) iex:1: undefined function _wont_be_imported/0
+iex> import Example
+iex> _wont_be_imported()
+** (CompileError) iex:1: undefined function _wont_be_imported/0
+```
 
 Due to this property, Elixir relies on functions starting with underscore to attach compile-time metadata to modules. Such functions are most often in the `__foo__` format. For example, every module in Elixir has an [`__info__/1`](`c:Module.__info__/1`) function:
 
-    iex> String.__info__(:functions)
-    [at: 2, capitalize: 1, chunk: 2, ...]
+```elixir
+iex> String.__info__(:functions)
+[at: 2, capitalize: 1, chunk: 2, ...]
+```
 
 Elixir also includes five special forms that follow the double underscore format: `__CALLER__/0`, `__DIR__/0`, `__ENV__/0`and `__MODULE__/0` retrieve compile-time information about the current environment, while `__STACKTRACE__/0` retrieves the stacktrace for the current exception.
 
@@ -57,39 +65,41 @@ A trailing bang (exclamation mark) signifies a function or macro where failure c
 
 One example is `File.read/1` and `File.read!/1`. `File.read/1` will return a success or failure tuple, whereas `File.read!/1` will return a plain value or else raise an exception:
 
-    iex> File.read("file.txt")
-    {:ok, "file contents"}
-    iex> File.read("no_such_file.txt")
-    {:error, :enoent}
+```elixir
+iex> File.read("file.txt")
+{:ok, "file contents"}
+iex> File.read("no_such_file.txt")
+{:error, :enoent}
 
-    iex> File.read!("file.txt")
-    "file contents"
-    iex> File.read!("no_such_file.txt")
-    ** (File.Error) could not read file no_such_file.txt: no such file or directory
+iex> File.read!("file.txt")
+"file contents"
+iex> File.read!("no_such_file.txt")
+** (File.Error) could not read file no_such_file.txt: no such file or directory
+```
 
 The version without `!` is preferred when you want to handle different outcomes using pattern matching:
 
-    case File.read(file) do
-      {:ok, body} -> # do something with the `body`
-      {:error, reason} -> # handle the error caused by `reason`
-    end
+```elixir
+case File.read(file) do
+  {:ok, body} -> # do something with the `body`
+  {:error, reason} -> # handle the error caused by `reason`
+end
+```
 
 However, if you expect the outcome to always be successful (for instance, if you expect the file always to exist), the bang variation can be more convenient and will raise a more helpful error message (than a failed pattern match) on failure.
 
 When thinking about failure cases, we are often thinking about semantic errors related to the operation being performed, such as failing to open a file or trying to fetch key from a map. Errors that come from invalid argument types, or similar, must always raise regardless if the function has a bang or not. In such cases, the exception is often an `ArgumentError` or a detailed `FunctionClauseError`:
 
-    iex(1)> File.read(123)
-    ** (FunctionClauseError) no function clause matching in IO.chardata_to_string/1
-
-        The following arguments were given to IO.chardata_to_string/1:
-
-            # 1
-            123
-
-        Attempted function clauses (showing 2 out of 2):
-
-            def chardata_to_string(string) when is_binary(string)
-            def chardata_to_string(list) when is_list(list)
+```elixir
+iex(1)> File.read(123)
+** (FunctionClauseError) no function clause matching in IO.chardata_to_string/1
+    The following arguments were given to IO.chardata_to_string/1:
+        # 1
+        123
+    Attempted function clauses (showing 2 out of 2):
+        def chardata_to_string(string) when is_binary(string)
+        def chardata_to_string(list) when is_list(list)
+```
 
 More examples of paired functions: `Base.decode16/2` and `Base.decode16!/2`, `File.cwd/0` and `File.cwd!/0`. In some situations, you may have bang functions without a non-bang counterpart. They also imply the possibility of errors, such as: `Protocol.assert_protocol!/1` and `PartitionSupervisor.resize!/2`. This can be useful if you foresee the possibility of adding a non-raising variant in the future.
 
