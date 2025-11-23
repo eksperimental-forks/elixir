@@ -96,11 +96,13 @@ Every release contains an environment file, named `env.sh` on Unix-like systems 
 
 For instance, releases run using short-names (`--sname`). However, if you want to actually run a distributed key-value store in production, you will need multiple nodes and start the release with the `--name` option. We can achieve this by setting the `RELEASE_DISTRIBUTION` environment variable inside the `env.sh` and `env.bat` files. Mix already has a template for said files which we can customize, so let's ask Mix to copy them to our application:
 
-    $ mix release.init
-    * creating rel/vm.args.eex
-    * creating rel/remote.vm.args.eex
-    * creating rel/env.sh.eex
-    * creating rel/env.bat.eex
+```console
+$ mix release.init
+* creating rel/vm.args.eex
+* creating rel/remote.vm.args.eex
+* creating rel/env.sh.eex
+* creating rel/env.bat.eex
+```
 
 If you open up `rel/env.sh.eex`, you will see:
 
