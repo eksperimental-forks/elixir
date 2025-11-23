@@ -54,7 +54,9 @@ Elixir conforms to the standards outlined in the [Unicode Standard Annex #31: Un
 
 The general Elixir identifier rule is specified as:
 
-    <Identifier> := <Start> <Continue>* <Ending>?
+```text
+<Identifier> := <Start> <Continue>* <Ending>?
+```
 
 where `<Start>` uses the same categories as the spec but normalizes them to the NFC form (see R4):
 
