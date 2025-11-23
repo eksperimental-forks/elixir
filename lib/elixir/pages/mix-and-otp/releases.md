@@ -104,7 +104,7 @@ For instance, releases run using short-names (`--sname`). However, if you want t
 
 If you open up `rel/env.sh.eex`, you will see:
 
-```shell
+```sh
 #!/bin/sh
 
 # # Sets and enables heart (recommended only in daemon mode)
@@ -148,14 +148,16 @@ Once again, set the `RELEASE_DISTRIBUTION` variable to `name` and you are good t
 
 The `rel/vm.args.eex` allows you to specify low-level flags that control how the Erlang VM and its runtime operate. You specify entries as if you were specifying arguments in the command line with code comments also supported. Here is the default generated file:
 
-    ## Customize flags given to the VM: https://www.erlang.org/doc/man/erl.html
-    ## -mode/-name/-sname/-setcookie are configured via env vars, do not set them here
+```sh
+## Customize flags given to the VM: https://www.erlang.org/doc/man/erl.html
+## -mode/-name/-sname/-setcookie are configured via env vars, do not set them here
 
-    ## Increase number of concurrent ports/sockets
-    ##+Q 65536
+## Increase number of concurrent ports/sockets
+##+Q 65536
 
-    ## Tweak GC to run more often
-    ##-env ERL_FULLSWEEP_AFTER 10
+## Tweak GC to run more often
+##-env ERL_FULLSWEEP_AFTER 10
+```
 
 You can see [a complete list of VM arguments and flags in the Erlang documentation](http://www.erlang.org/doc/man/erl.html).
 
