@@ -119,47 +119,28 @@ jobs:
     steps:
       - name: Configure Git
         run: git config --global core.autocrlf input
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-        with:
-          fetch-depth: 50
+
       - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
         with:
           otp-version: ${{ matrix.otp_version }}
+
       - name: Compile Elixir
         run: |
           Remove-Item -Recurse -Force '.git'
           make compile
+
       - name: Build info
         run: bin/elixir --version
+
       - name: Check format
         run: make test_formatted && echo "All Elixir source code files are properly formatted."
+
       - name: Erlang test suite
         run: make test_erlang
+
       - name: Elixir test suite
         run: |
           Remove-Item 'c:/Windows/System32/drivers/etc/hosts'
           make test_elixir
-
-  license_compliance:
-    name: Check Licence Compliance
-
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Use HTTPS instead of SSH for Git cloning
-        id: git-config
-        shell: bash
-        run: git config --global url.https://github.com/.insteadOf ssh://git@github.com/
-
-      - name: Checkout project
-        id: checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-
-      - name: "Run OSS Review Toolkit"
-        id: ort
-        uses: ./.github/workflows/ort
-        with:
-          upload-reports: true
-          fail-on-violation: true
-          report-formats: "WebApp"
-          version: "${{ github.sha }}"
