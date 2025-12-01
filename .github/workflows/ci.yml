@@ -30,7 +30,7 @@ jobs:
       matrix:
         include:
           # NOTE: When updating latest Erlang/OTP version, also update it in
-          #       .github/workflows/ci-docs.yml
+          #       .github/workflows/documentation.yml
           - otp_version: "28.1"
             deterministic: true
           - otp_version: "28.1"

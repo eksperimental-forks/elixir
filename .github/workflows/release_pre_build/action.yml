@@ -48,7 +48,7 @@ runs:
 
     - name: Build Docs
       if: inputs.build_docs
-      uses: ./.github/workflows/docs
+      uses: ./.github/workflows/build_docs
       with:
         otp_version: ${{ inputs.otp_version }}
         ex_doc_version: ${{ github.ref_name  == 'main' && 'main' || 'latest_stable' }}
