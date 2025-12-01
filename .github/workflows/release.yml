@@ -85,7 +85,7 @@ jobs:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: "Build Release"
-        uses: ./.github/workflows/release_pre_built
+        uses: ./.github/workflows/release_pre_build
         with:
           otp_version: ${{ matrix.otp_version }}
           otp: ${{ matrix.otp }}
