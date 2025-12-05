@@ -6,12 +6,7 @@ name: CI
 
 on:
   push:
-    paths-ignore:
-      - "lib/**/*.md"
-
   pull_request:
-    paths-ignore:
-      - "lib/**/*.md"
 
 env:
   ELIXIR_ASSERT_TIMEOUT: 2000
@@ -22,14 +17,42 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-24.04
+
+    outputs:
+      elixir: ${{ steps.changes.outputs.elixir }}
+      docs: ${{ steps.changes.outputs.docs }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Detect file changes
+        id: changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        with:
+          filters: |
+            elixir:
+              # Changes to some Markdown files do NOT trigger Elixir checks.
+              - '!*.md'
+              - '!lib/*/pages/**/*.md'
+
+            docs:
+              # Changes to test files do NOT trigger documentation builds.
+              - '!lib/*/test/**/*'
+
   test_linux:
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'
+
     name: >-
       Ubuntu 24.04, OTP ${{ matrix.otp_version }}
       ${{ matrix.docs && ' (docs)' || '' }}
       ${{ matrix.coverage && ' (coverage)' || '' }}
       ${{ matrix.deterministic && ' (deterministic)' || '' }}
-
-    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -37,35 +60,45 @@ jobs:
         include:
           - otp_version: "28.1"
             deterministic: true
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "28.1"
             erlc_opts: "warnings_as_errors"
             docs: true
             coverage: true
+            enabled: ${{ needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'}}
+
           - otp_version: "27.3"
             erlc_opts: "warnings_as_errors"
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "27.0"
             erlc_opts: "warnings_as_errors"
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "26.0"
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: master
             development: true
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: maint
             development: true
+            enabled: ${{ needs.changes.outputs.elixir == 'true' }}
 
     # Earlier Erlang/OTP versions ignored compiler directives
     # when using warnings_as_errors. So we only set ERLC_OPTS
     # from Erlang/OTP 27+.
     env:
       ERLC_OPTS: ${{ matrix.erlc_opts || '' }}
+      RUN_ELIXIR: ${{ needs.changes.outputs.elixir == 'true' || '' }}
+      RUN_DOCS: ${{ needs.changes.outputs.docs == 'true' || '' }}
 
     steps:
       - name: Checkout
+        if: matrix.enabled
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-
-      - name: Detect changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes
-        with:
-          filters: .github/file-filters.yml
 
       - name: Setup BEAM
         uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
@@ -73,32 +106,37 @@ jobs:
           otp-version: ${{ matrix.otp_version }}
 
       - name: Set ERL_COMPILER_OPTIONS
-        if: ${{ matrix.deterministic }}
+        if: matrix.deterministic && matrix.enabled
         run: echo "ERL_COMPILER_OPTIONS=deterministic" >> $GITHUB_ENV
 
       - name: Compile Elixir
+        if: matrix.enabled
         run: |
           make compile
           echo "$PWD/bin" >> $GITHUB_PATH
 
       - name: Build info
+        if: matrix.enabled
         run: bin/elixir --version
 
       - name: Check format
+        if: env.RUN_ELIXIR
         run: make test_formatted && echo "All Elixir source code files are properly formatted."
 
       - name: Erlang test suite
+        if: env.RUN_ELIXIR
         run: make test_erlang
         continue-on-error: ${{ matrix.development == true }}
 
       - name: Elixir test suite
+        if: env.RUN_ELIXIR
         run: make test_elixir
         continue-on-error: ${{ matrix.development == true }}
         env:
           COVER: "${{ matrix.coverage }}"
 
       - name: Build docs (ExDoc main)
-        if: ${{ matrix.docs }}
+        if: matrix.docs && env.RUN_DOCS
         run: |
           cd ..
           git clone https://github.com/elixir-lang/ex_doc.git --depth 1
@@ -109,18 +147,18 @@ jobs:
           DOCS_OPTIONS="--warnings-as-errors" make docs
 
       - name: "Calculate Coverage"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && env.RUN_ELIXIR
         run: make cover | tee "$GITHUB_STEP_SUMMARY"
 
       - name: "Upload Coverage Artifact"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && env.RUN_ELIXIR
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: TestCoverage
+          name: TestCoverage-OTP-${{ matrix.otp_version }}
           path: cover/*
 
       - name: Check reproducible builds
-        if: ${{ matrix.deterministic }}
+        if: matrix.deterministic && env.RUN_ELIXIR
         run: |
           rm -rf .git
           # Recompile System without .git
@@ -128,6 +166,8 @@ jobs:
           taskset 1 make check_reproducible
 
   test_windows:
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
     name: Windows Server 2022, OTP ${{ matrix.otp_version }}
     runs-on: windows-2022
 
