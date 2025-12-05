@@ -6,12 +6,7 @@ name: CI
 
 on:
   push:
-    paths-ignore:
-      - "lib/**/*.md"
-
   pull_request:
-    paths-ignore:
-      - "lib/**/*.md"
 
 env:
   ELIXIR_ASSERT_TIMEOUT: 2000
@@ -22,69 +17,171 @@ permissions:
   contents: read
 
 jobs:
-  test_linux:
-    name: Ubuntu 24.04, OTP ${{ matrix.otp_version }}${{ matrix.deterministic && ' (deterministic)' || '' }}${{ matrix.coverage && ' (coverage)' || '' }}
+  changes:
+    name: Detect changes
     runs-on: ubuntu-24.04
+
+    outputs:
+      elixir: ${{ steps.filter.outputs.elixir }}
+      docs: ${{ steps.filter.outputs.docs }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 100
+
+      - name: Detect file changes
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            # Pushing to main: compare against main before the push
+            git fetch origin main
+            BASE="origin/main"
+            HEAD="${{ github.sha }}"
+            echo "Comparing all commits in push to main: $BASE..$HEAD"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # Pushing to other branch: compare against main
+            git fetch origin main
+            BASE="origin/main"
+            HEAD="${{ github.sha }}"
+            echo "Comparing branch against main: $BASE..$HEAD"
+          else
+            # Pull request: compare against the target branch
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+            git fetch origin "$BASE_BRANCH"
+            BASE="origin/$BASE_BRANCH"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+            echo "Comparing PR against $BASE_BRANCH: $BASE..$HEAD"
+          fi
+
+          ELIXIR_CHANGED_FILES=$(git diff --name-only $BASE $HEAD -- \
+            ':!*.md' \
+            ':!lib/*/pages/**/*.md')
+
+          DOCS_CHANGED_FILES=$(git diff --name-only $BASE $HEAD -- \
+            ':!lib/*/test/**/*')
+
+          if [ -n "$ELIXIR_CHANGED_FILES" ]; then
+            echo "elixir=true" >> $GITHUB_OUTPUT
+          else
+            echo "elixir=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "$DOCS_CHANGED_FILES" ]; then
+            echo "docs=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Show detected changes
+        run: |
+          echo "Changes detected:"
+          echo "- Elixir: ${{ steps.filter.outputs.elixir }}"
+          echo "- Documentation: ${{ steps.filter.outputs.docs }}"
+
+  test_linux:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'
+
+    name: >-
+      Ubuntu 24.04, OTP ${{ matrix.otp_version }}
+      ${{ matrix.docs && ' (docs)' || '' }}
+      ${{ matrix.coverage && ' (coverage)' || '' }}
+      ${{ matrix.deterministic && ' (deterministic)' || '' }}
 
     strategy:
       fail-fast: false
+
       matrix:
         include:
           - otp_version: "28.1"
             deterministic: true
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "28.1"
             erlc_opts: "warnings_as_errors"
             docs: true
             coverage: true
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            run_docs: ${{ needs.changes.outputs.docs == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'}}
+
           - otp_version: "27.3"
             erlc_opts: "warnings_as_errors"
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "27.0"
             erlc_opts: "warnings_as_errors"
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: "26.0"
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: master
             development: true
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
+
           - otp_version: maint
             development: true
+            run_elixir: ${{ needs.changes.outputs.elixir == 'true' }}
+            should_run: ${{ needs.changes.outputs.elixir == 'true' }}
 
     # Earlier Erlang/OTP versions ignored compiler directives
     # when using warnings_as_errors. So we only set ERLC_OPTS
     # from Erlang/OTP 27+.
     env:
       ERLC_OPTS: ${{ matrix.erlc_opts || '' }}
-    steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
+    steps:
+      - name: Checkout
+        if: matrix.should_run
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Setup BEAM
+        if: matrix.should_run
+        uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
         with:
           otp-version: ${{ matrix.otp_version }}
 
       - name: Set ERL_COMPILER_OPTIONS
-        if: ${{ matrix.deterministic }}
+        if: matrix.should_run
         run: echo "ERL_COMPILER_OPTIONS=deterministic" >> $GITHUB_ENV
 
       - name: Compile Elixir
+        if: matrix.should_run
         run: |
           make compile
           echo "$PWD/bin" >> $GITHUB_PATH
 
       - name: Build info
+        if: matrix.should_run
         run: bin/elixir --version
 
       - name: Check format
+        if: matrix.run_elixir
         run: make test_formatted && echo "All Elixir source code files are properly formatted."
 
       - name: Erlang test suite
+        if: matrix.run_elixir
         run: make test_erlang
         continue-on-error: ${{ matrix.development == true }}
 
       - name: Elixir test suite
+        if: matrix.run_elixir
         run: make test_elixir
         continue-on-error: ${{ matrix.development == true }}
         env:
           COVER: "${{ matrix.coverage }}"
 
       - name: Build docs (ExDoc main)
-        if: ${{ matrix.docs }}
+        if: matrix.docs && matrix.run_docs
         run: |
           cd ..
           git clone https://github.com/elixir-lang/ex_doc.git --depth 1
@@ -95,18 +192,18 @@ jobs:
           DOCS_OPTIONS="--warnings-as-errors" make docs
 
       - name: "Calculate Coverage"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && matrix.run_elixir
         run: make cover | tee "$GITHUB_STEP_SUMMARY"
 
       - name: "Upload Coverage Artifact"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && matrix.run_elixir
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: TestCoverage
           path: cover/*
 
       - name: Check reproducible builds
-        if: ${{ matrix.deterministic }}
+        if: matrix.deterministic && matrix.run_elixir
         run: |
           rm -rf .git
           # Recompile System without .git
@@ -114,6 +211,8 @@ jobs:
           taskset 1 make check_reproducible
 
   test_windows:
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
     name: Windows Server 2022, OTP ${{ matrix.otp_version }}
     runs-on: windows-2022
 
@@ -128,9 +227,11 @@ jobs:
       - name: Configure Git
         run: git config --global core.autocrlf input
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - name: Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
+      - name: Setup BEAM
+        uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
         with:
           otp-version: ${{ matrix.otp_version }}
 
