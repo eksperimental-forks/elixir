@@ -6,12 +6,7 @@ name: CI
 
 on:
   push:
-    paths-ignore:
-      - "lib/**/*.md"
-
   pull_request:
-    paths-ignore:
-      - "lib/**/*.md"
 
 env:
   ELIXIR_ASSERT_TIMEOUT: 2000
@@ -22,9 +17,78 @@ permissions:
   contents: read
 
 jobs:
-  test_linux:
-    name: Ubuntu 24.04, OTP ${{ matrix.otp_version }}${{ matrix.deterministic && ' (deterministic)' || '' }}${{ matrix.coverage && ' (coverage)' || '' }}
+  changes:
+    name: Detect changes
     runs-on: ubuntu-24.04
+
+    outputs:
+      elixir: ${{ steps.filter.outputs.elixir }}
+      docs: ${{ steps.filter.outputs.docs }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect file changes
+        id: filter
+        run: |
+          git fetch origin main
+          BASE="origin/main"
+
+          if [ "${{ github.event_name }}" == "push" ]; then
+            HEAD=${{ github.sha }}
+          else
+            HEAD=${{ github.event.pull_request.head.sha }}
+          fi
+
+          echo "Comparing $BASE..$HEAD"
+
+          ELIXIR_CHANGED_FILES=$(git diff --name-only $BASE $HEAD -- \
+            ':!*.md' \
+            ':!lib/*/pages/**/*.md')
+
+          DOCS_CHANGED_FILES=$(git diff --name-only $BASE $HEAD -- \
+            '.github/workflows/ci.yml' \
+            'CHANGELOG.md' \
+            'Makefile' \
+            'VERSION' \
+            'lib/**/*' \
+            ':!lib/*/test/**/*')
+
+          if [ -n "$ELIXIR_CHANGED_FILES" ]; then
+            echo "elixir=true" >> $GITHUB_OUTPUT
+            echo "- Elixir files changed"
+          else
+            echo "elixir=false" >> $GITHUB_OUTPUT
+            echo "- No Elixir files changed"
+          fi
+
+          if [ -n "$DOCS_CHANGED_FILES" ]; then
+            echo "docs=true" >> $GITHUB_OUTPUT
+            echo "- Documentation files changed"
+          else
+            echo "docs=false" >> $GITHUB_OUTPUT
+            echo "- No documentation files changed"
+          fi
+
+      - name: Show detected changes
+        run: |
+          echo "Changes detected:"
+          echo "- Elixir: ${{ steps.filter.outputs.elixir }}"
+          echo "- Documentation: ${{ steps.filter.outputs.docs }}"
+
+  test_linux:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'
+
+    name: >-
+      Ubuntu 24.04, OTP ${{ matrix.otp_version }}
+      ${{ matrix.docs && needs.changes.outputs.docs == 'true' && ' (docs)' || '' }}
+      ${{ matrix.coverage && ' (coverage)' || '' }}
+      ${{ matrix.deterministic && ' (deterministic)' || '' }}
 
     strategy:
       fail-fast: false
@@ -51,10 +115,13 @@ jobs:
     # from Erlang/OTP 27+.
     env:
       ERLC_OPTS: ${{ matrix.erlc_opts || '' }}
-    steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Setup BEAM
+        uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
         with:
           otp-version: ${{ matrix.otp_version }}
 
@@ -74,17 +141,19 @@ jobs:
         run: make test_formatted && echo "All Elixir source code files are properly formatted."
 
       - name: Erlang test suite
+        if: needs.changes.outputs.elixir == 'true'
         run: make test_erlang
         continue-on-error: ${{ matrix.development == true }}
 
       - name: Elixir test suite
+        if: needs.changes.outputs.elixir == 'true'
         run: make test_elixir
         continue-on-error: ${{ matrix.development == true }}
         env:
           COVER: "${{ matrix.coverage }}"
 
       - name: Build docs (ExDoc main)
-        if: ${{ matrix.docs }}
+        if: matrix.docs && needs.changes.outputs.docs == 'true'
         run: |
           cd ..
           git clone https://github.com/elixir-lang/ex_doc.git --depth 1
@@ -95,18 +164,18 @@ jobs:
           DOCS_OPTIONS="--warnings-as-errors" make docs
 
       - name: "Calculate Coverage"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && needs.changes.outputs.elixir == 'true'
         run: make cover | tee "$GITHUB_STEP_SUMMARY"
 
       - name: "Upload Coverage Artifact"
-        if: ${{ matrix.coverage }}
+        if: matrix.coverage && needs.changes.outputs.elixir == 'true'
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: TestCoverage
           path: cover/*
 
       - name: Check reproducible builds
-        if: ${{ matrix.deterministic }}
+        if: matrix.deterministic && needs.changes.outputs.elixir == 'true'
         run: |
           rm -rf .git
           # Recompile System without .git
@@ -114,6 +183,8 @@ jobs:
           taskset 1 make check_reproducible
 
   test_windows:
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
     name: Windows Server 2022, OTP ${{ matrix.otp_version }}
     runs-on: windows-2022
 
@@ -128,9 +199,11 @@ jobs:
       - name: Configure Git
         run: git config --global core.autocrlf input
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - name: Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
+      - name: Setup BEAM
+        uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
         with:
           otp-version: ${{ matrix.otp_version }}
 
