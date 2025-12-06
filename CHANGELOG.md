@@ -3,8 +3,9 @@
   SPDX-FileCopyrightText: 2021 The Elixir Team
   SPDX-FileCopyrightText: 2012 Plataformatec
 -->
-
 # Changelog for Elixir v1.20
+
+foo
 
 ## Type system improvements
 
