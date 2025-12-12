@@ -57,15 +57,17 @@ jobs:
             echo "Comparing PR against $BASE_BRANCH: $BASE..$HEAD"
           fi
 
+
           ELIXIR_PATHSPECS=(
             # Changes to some Markdown files do NOT trigger Elixir checks.
             ':!*.md'
+            ':!lib/*/pages/*.md'
             ':!lib/*/pages/**/*.md'
           )
 
           DOCS_PATHSPECS=(
             # Changes to test files do NOT trigger documentation builds.
-            ':!lib/*/test/**/*'
+            ':!lib/*/test/**'
           )
 
           ELIXIR_CHANGED_FILES=$(git diff --name-only "$BASE" "$HEAD" -- \
