@@ -6,6 +6,8 @@
 
 # Changelog for Elixir v1.20
 
+foo
+
 ## Type system improvements
 
 ### Full type inference
