@@ -5,8 +5,6 @@
 
 # Introduction
 
-foo
-
 Welcome!
 
 This guide will teach you about Elixir fundamentals - the language syntax, how to define modules, the common data structures in the language, and more. This chapter will focus on ensuring that Elixir is installed and that you can successfully run Elixir's Interactive Shell, called IEx.
