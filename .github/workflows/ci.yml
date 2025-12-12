@@ -96,13 +96,14 @@ jobs:
   test_linux:
     needs: changes
     runs-on: ubuntu-24.04
-    if: needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'
 
     name: >-
       Ubuntu 24.04, OTP ${{ matrix.otp_version }}
       ${{ matrix.docs && ' (docs)' || '' }}
       ${{ matrix.coverage && ' (coverage)' || '' }}
       ${{ matrix.deterministic && ' (deterministic)' || '' }}
+
+    if: needs.changes.outputs.elixir == 'true' || needs.changes.outputs.docs == 'true'
 
     strategy:
       fail-fast: false
@@ -219,9 +220,9 @@ jobs:
 
   test_windows:
     needs: changes
-    if: needs.changes.outputs.elixir == 'true'
     name: Windows Server 2022, OTP ${{ matrix.otp_version }}
     runs-on: windows-2022
+    if: needs.changes.outputs.elixir == 'true'
 
     strategy:
       matrix:
