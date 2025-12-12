@@ -60,14 +60,13 @@ jobs:
 
           ELIXIR_PATHSPECS=(
             # Changes to some Markdown files do NOT trigger Elixir checks.
-            ':!*.md'
-            ':!lib/*/pages/*.md'
-            ':!lib/*/pages/**/*.md'
+            ':(exclude,glob)*.md'
+            ':(exclude,glob)lib/*/pages/**/*.md'
           )
 
           DOCS_PATHSPECS=(
             # Changes to test files do NOT trigger documentation builds.
-            ':!lib/*/test/**'
+            ':(exclude,glob)lib/*/test/**/*'
           )
 
           ELIXIR_CHANGED_FILES=$(git diff --name-only "$BASE" "$HEAD" -- \
