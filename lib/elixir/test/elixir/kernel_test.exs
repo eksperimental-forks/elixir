@@ -7,6 +7,7 @@ Code.require_file("test_helper.exs", __DIR__)
 defmodule KernelTest do
   use ExUnit.Case, async: true
 
+  # foo
   # Skip these doctests are they emit warnings
   doctest Kernel,
     except:
